@@ -64,7 +64,7 @@ The flexibility of Retail Node Installer comes to fruition with the following pr
   * `console=tty0`
   * `httpserver=@@RNI_IP@@`
   * `bootstrap=http://@@RNI_IP@@/profile/${profileName}/bootstrap.sh`
-* `conf/files.yml` - This file contains a few definitions that tell Retail Node Installer to download specific files that you can customize. **Please check if there are any [Known Issues](#Known-Issues) before changing this file from the default.** See `conf/files.sample.yml` for a full example.
+* `conf/files.yml` - This file contains a few definitions that tell Retail Node Installer to download specific files that you can customize. **Please check if there are any [Known Limitations](#Known-Limitations) before changing this file from the default.** See `conf/files.sample.yml` for a full example.
 * `bootstrap.sh` - A profile is required to have a `bootstrap.sh` as an entry point. This is an arbitrary script that you can control. If you plan to create profiles for other operating systems such as Ubuntu or Debian, it is recommended to use [preseed](https://wiki.debian.org/DebianInstaller/Preseed) to launch `bootstrap.sh` as the last step.
 Currently the following variables are processed:
   * `@@RNI_DHCP_MIN@@`
