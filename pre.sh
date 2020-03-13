@@ -3,8 +3,13 @@
 # Copyright (C) 2019 Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
 
+set -a
+
 #this is provided while using Utility OS
 source /opt/bootstrap/functions
+
+ubuntu_packages="net-tools"
+ubuntu_bundles="standard"
 
 PROVISION_LOG="/tmp/provisioning.log"
 run "Begin provisioning process..." \
@@ -17,188 +22,187 @@ PROVISIONER=$1
 kernel_params=$(cat /proc/cmdline)
 
 if [[ $kernel_params == *"proxy="* ]]; then
-    tmp="${kernel_params##*proxy=}"
-    param_proxy="${tmp%% *}"
+	tmp="${kernel_params##*proxy=}"
+	export param_proxy="${tmp%% *}"
 
-    export http_proxy=${param_proxy}
-    export https_proxy=${param_proxy}
-    export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
-    export HTTP_PROXY=${param_proxy}
-    export HTTPS_PROXY=${param_proxy}
-    export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
-    export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
-    export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
+	export http_proxy=${param_proxy}
+	export https_proxy=${param_proxy}
+	export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
+	export HTTP_PROXY=${param_proxy}
+	export HTTPS_PROXY=${param_proxy}
+	export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
+	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
+	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
 elif [ $(
-    nc -vz ${PROVISIONER} 3128
-    echo $?
+	nc -vz ${PROVISIONER} 3128
+	echo $?
 ) -eq 0 ]; then
-    export http_proxy=http://${PROVISIONER}:3128/
-    export https_proxy=http://${PROVISIONER}:3128/
-    export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
-    export HTTP_PROXY=http://${PROVISIONER}:3128/
-    export HTTPS_PROXY=http://${PROVISIONER}:3128/
-    export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
-    export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
-    export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
+	export http_proxy=http://${PROVISIONER}:3128/
+	export https_proxy=http://${PROVISIONER}:3128/
+	export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
+	export HTTP_PROXY=http://${PROVISIONER}:3128/
+	export HTTPS_PROXY=http://${PROVISIONER}:3128/
+	export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
+	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
+	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
 fi
 
 if [[ $kernel_params == *"proxysocks="* ]]; then
-    tmp="${kernel_params##*proxysocks=}"
-    param_proxysocks="${tmp%% *}"
+	tmp="${kernel_params##*proxysocks=}"
+	param_proxysocks="${tmp%% *}"
 
-    export FTP_PROXY=${param_proxysocks}
+	export FTP_PROXY=${param_proxysocks}
 
-    tmp_socks=$(echo ${param_proxysocks} | sed "s#http://##g" | sed "s#https://##g" | sed "s#/##g")
-    export SSH_PROXY_CMD="-o ProxyCommand='nc -x ${tmp_socks} %h %p'"
+	tmp_socks=$(echo ${param_proxysocks} | sed "s#http://##g" | sed "s#https://##g" | sed "s#/##g")
+	export SSH_PROXY_CMD="-o ProxyCommand='nc -x ${tmp_socks} %h %p'"
 fi
 
 if [[ $kernel_params == *"httppath="* ]]; then
-    tmp="${kernel_params##*httppath=}"
-    param_httppath="${tmp%% *}"
+	tmp="${kernel_params##*httppath=}"
+	export param_httppath="${tmp%% *}"
 fi
 
 if [[ $kernel_params == *"parttype="* ]]; then
-    tmp="${kernel_params##*parttype=}"
-    param_parttype="${tmp%% *}"
+	tmp="${kernel_params##*parttype=}"
+	export param_parttype="${tmp%% *}"
 elif [ -d /sys/firmware/efi ]; then
-    param_parttype="efi"
+	export param_parttype="efi"
 else
-    param_parttype="msdos"
+	export param_parttype="msdos"
 fi
 
 if [[ $kernel_params == *"bootstrap="* ]]; then
-    tmp="${kernel_params##*bootstrap=}"
-    param_bootstrap="${tmp%% *}"
-    param_bootstrapurl=$(echo $param_bootstrap | sed "s#/$(basename $param_bootstrap)\$##g")
+	tmp="${kernel_params##*bootstrap=}"
+	export param_bootstrap="${tmp%% *}"
+	export param_bootstrapurl=$(echo $param_bootstrap | sed "s#/$(basename $param_bootstrap)\$##g")
+fi
+
+if [[ $kernel_params == *"basebranch="* ]]; then
+	tmp="${kernel_params##*basebranch=}"
+	export param_basebranch="${tmp%% *}"
 fi
 
 if [[ $kernel_params == *"token="* ]]; then
-    tmp="${kernel_params##*token=}"
-    param_token="${tmp%% *}"
+	tmp="${kernel_params##*token=}"
+	export param_token="${tmp%% *}"
 fi
 
 if [[ $kernel_params == *"agent="* ]]; then
-    tmp="${kernel_params##*agent=}"
-    param_agent="${tmp%% *}"
+	tmp="${kernel_params##*agent=}"
+	export param_agent="${tmp%% *}"
 else
-    param_agent="master"
+	export param_agent="master"
 fi
 
 if [[ $kernel_params == *"kernparam="* ]]; then
-    tmp="${kernel_params##*kernparam=}"
-    temp_param_kernparam="${tmp%% *}"
-    param_kernparam=$(echo ${temp_param_kernparam} | sed 's/#/ /g' | sed 's/:/=/g')
+	tmp="${kernel_params##*kernparam=}"
+	temp_param_kernparam="${tmp%% *}"
+	export param_kernparam=$(echo ${temp_param_kernparam} | sed 's/#/ /g' | sed 's/:/=/g')
 fi
 
 if [[ $kernel_params == *"ubuntuversion="* ]]; then
-    tmp="${kernel_params##*ubuntuversion=}"
-    param_ubuntuversion="${tmp%% *}"
+	tmp="${kernel_params##*ubuntuversion=}"
+	export param_ubuntuversion="${tmp%% *}"
 else
-    param_ubuntuversion="cosmic"
+	export param_ubuntuversion="cosmic"
 fi
 
 # The following is bandaid for Disco Dingo
 if [ $param_ubuntuversion = "disco" ]; then
-    DOCKER_UBUNTU_RELEASE="cosmic"
+	export DOCKER_UBUNTU_RELEASE="cosmic"
 else
-    DOCKER_UBUNTU_RELEASE=$param_ubuntuversion
+	export DOCKER_UBUNTU_RELEASE=$param_ubuntuversion
 fi
 
 if [[ $kernel_params == *"arch="* ]]; then
-    tmp="${kernel_params##*arch=}"
-    param_arch="${tmp%% *}"
+	tmp="${kernel_params##*arch=}"
+	export param_arch="${tmp%% *}"
 else
-    param_arch="amd64"
+	export param_arch="amd64"
 fi
 
 if [[ $kernel_params == *"insecurereg="* ]]; then
-    tmp="${kernel_params##*insecurereg=}"
-    param_insecurereg="${tmp%% *}"
+	tmp="${kernel_params##*insecurereg=}"
+	export param_insecurereg="${tmp%% *}"
 fi
 
 if [[ $kernel_params == *"username="* ]]; then
-    tmp="${kernel_params##*username=}"
-    param_username="${tmp%% *}"
+	tmp="${kernel_params##*username=}"
+	export param_username="${tmp%% *}"
 else
-    param_username="sys-admin"
+	export param_username="sys-admin"
 fi
 
 if [[ $kernel_params == *"password="* ]]; then
-    tmp="${kernel_params##*password=}"
-    param_password="${tmp%% *}"
+	tmp="${kernel_params##*password=}"
+	export param_password="${tmp%% *}"
 else
-    param_password="password"
+	export param_password="password"
 fi
 
 if [[ $kernel_params == *"debug="* ]]; then
-    tmp="${kernel_params##*debug=}"
-    param_debug="${tmp%% *}"
+	tmp="${kernel_params##*debug=}"
+	export param_debug="${tmp%% *}"
 fi
 
 if [[ $kernel_params == *"release="* ]]; then
-    tmp="${kernel_params##*release=}"
-    param_release="${tmp%% *}"
+	tmp="${kernel_params##*release=}"
+	export param_release="${tmp%% *}"
 else
-    param_release='dev'
+	export param_release='dev'
 fi
 
 if [[ $param_release == 'prod' ]]; then
-    kernel_params="$param_kernparam" # ipv6.disable=1
+	export kernel_params="$param_kernparam" # ipv6.disable=1
 else
-    kernel_params="$param_kernparam"
+	export kernel_params="$param_kernparam"
 fi
 
-# --- Config
-ubuntu_bundles="standard openssh-server"
-ubuntu_packages="net-tools"
-
-pull_sysdockerimagelist=""
-wget_sysdockerimagelist=""
 
 # --- Get free memory
-freemem=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+export freemem=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 
 # --- Detect HDD ---
 if [ -d /sys/block/[vsh]da ]; then
-    export DRIVE=$(echo /dev/$(ls -l /sys/block/[vsh]da | grep -v usb | head -n1 | sed 's/^.*\([vsh]d[a-z]\+\).*$/\1/'))
-    if [[ $param_parttype == 'efi' ]]; then
-        export EFI_PARTITION=${DRIVE}1
-        export BOOT_PARTITION=${DRIVE}2
-        export SWAP_PARTITION=${DRIVE}3
-        export ROOT_PARTITION=${DRIVE}4
-    else
-        export BOOT_PARTITION=${DRIVE}1
-        export SWAP_PARTITION=${DRIVE}2
-        export ROOT_PARTITION=${DRIVE}3
-    fi
+	export DRIVE=$(echo /dev/$(ls -l /sys/block/[vsh]da | grep -v usb | head -n1 | sed 's/^.*\([vsh]d[a-z]\+\).*$/\1/'))
+	if [[ $param_parttype == 'efi' ]]; then
+		export EFI_PARTITION=${DRIVE}1
+		export BOOT_PARTITION=${DRIVE}2
+		export SWAP_PARTITION=${DRIVE}3
+		export ROOT_PARTITION=${DRIVE}4
+	else
+		export BOOT_PARTITION=${DRIVE}1
+		export SWAP_PARTITION=${DRIVE}2
+		export ROOT_PARTITION=${DRIVE}3
+	fi
 elif [ -d /sys/block/nvme[0-9]n[0-9] ]; then
-    export DRIVE=$(echo /dev/$(ls -l /sys/block/nvme* | grep -v usb | head -n1 | sed 's/^.*\(nvme[a-z0-1]\+\).*$/\1/'))
-    if [[ $param_parttype == 'efi' ]]; then
-        export EFI_PARTITION=${DRIVE}p1
-        export BOOT_PARTITION=${DRIVE}p2
-        export SWAP_PARTITION=${DRIVE}p3
-        export ROOT_PARTITION=${DRIVE}p4
-    else
-        export BOOT_PARTITION=${DRIVE}p1
-        export SWAP_PARTITION=${DRIVE}p2
-        export ROOT_PARTITION=${DRIVE}p3
-    fi
+	export DRIVE=$(echo /dev/$(ls -l /sys/block/nvme* | grep -v usb | head -n1 | sed 's/^.*\(nvme[a-z0-1]\+\).*$/\1/'))
+	if [[ $param_parttype == 'efi' ]]; then
+		export EFI_PARTITION=${DRIVE}p1
+		export BOOT_PARTITION=${DRIVE}p2
+		export SWAP_PARTITION=${DRIVE}p3
+		export ROOT_PARTITION=${DRIVE}p4
+	else
+		export BOOT_PARTITION=${DRIVE}p1
+		export SWAP_PARTITION=${DRIVE}p2
+		export ROOT_PARTITION=${DRIVE}p3
+	fi
 elif [ -d /sys/block/mmcblk[0-9] ]; then
-    export DRIVE=$(echo /dev/$(ls -l /sys/block/mmcblk[0-9] | grep -v usb | head -n1 | sed 's/^.*\(mmcblk[0-9]\+\).*$/\1/'))
-    if [[ $param_parttype == 'efi' ]]; then
-        export EFI_PARTITION=${DRIVE}p1
-        export BOOT_PARTITION=${DRIVE}p2
-        export SWAP_PARTITION=${DRIVE}p3
-        export ROOT_PARTITION=${DRIVE}p4
-    else
-        export BOOT_PARTITION=${DRIVE}p1
-        export SWAP_PARTITION=${DRIVE}p2
-        export ROOT_PARTITION=${DRIVE}p3
-    fi
+	export DRIVE=$(echo /dev/$(ls -l /sys/block/mmcblk[0-9] | grep -v usb | head -n1 | sed 's/^.*\(mmcblk[0-9]\+\).*$/\1/'))
+	if [[ $param_parttype == 'efi' ]]; then
+		export EFI_PARTITION=${DRIVE}p1
+		export BOOT_PARTITION=${DRIVE}p2
+		export SWAP_PARTITION=${DRIVE}p3
+		export ROOT_PARTITION=${DRIVE}p4
+	else
+		export BOOT_PARTITION=${DRIVE}p1
+		export SWAP_PARTITION=${DRIVE}p2
+		export ROOT_PARTITION=${DRIVE}p3
+	fi
 else
-    echo "No supported drives found!" 2>&1 | tee -a /dev/tty0
-    sleep 300
-    reboot
+	echo "No supported drives found!" 2>&1 | tee -a /dev/tty0
+	sleep 300
+	reboot
 fi
 
 export BOOTFS=/target/boot
@@ -282,6 +286,7 @@ if [ $(wget http://${PROVISIONER}:5000/v2/_catalog -O-) ] 2>/dev/null; then
     export REGISTRY_MIRROR="--registry-mirror=http://${PROVISIONER}:5000"
 fi
 
+# -- Configure Image database ---
 run "Configuring Image Database" \
     "mkdir -p $ROOTFS/tmp/docker && \
     chmod 777 $ROOTFS/tmp && \
@@ -326,7 +331,7 @@ if [[ $param_parttype == 'efi' ]]; then
         tasksel install ${ubuntu_bundles} && \
         apt install -y ${ubuntu_packages} && \
         apt clean\"' && \
-        wget --header \"Authorization: token ${param_token}\" -O - ${param_bootstrapurl}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab && \
+        wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab && \
         echo \"${EFI_PARTITION}  /boot/efi       vfat    umask=0077      0       1\" >> $ROOTFS/etc/fstab" \
         "$TMP/provisioning.log"
 else
@@ -356,19 +361,19 @@ else
         tasksel install ${ubuntu_bundles} && \
         apt install -y ${ubuntu_packages} && \
         apt clean\"' && \
-        wget --header \"Authorization: token ${param_token}\" -O - ${param_bootstrapurl}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab" \
+        wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab" \
         "$TMP/provisioning.log"
 fi
 
 # --- Enabling Ubuntu boostrap items ---
-HOSTNAME="ubuntu-$(tr </dev/urandom -dc a-f0-9 | head -c8)"
+HOSTNAME="ubuntu-$(tr </dev/urandom -dc a-f0-9 | head -c5)"
 run "Enabling Ubuntu boostrap items" \
-    "wget --header \"Authorization: token ${param_token}\" -O $ROOTFS/etc/systemd/system/show-ip.service ${param_bootstrapurl}/systemd/show-ip.service && \
+    "wget --header \"Authorization: token ${param_token}\" -O $ROOTFS/etc/systemd/system/show-ip.service ${param_basebranch}/systemd/show-ip.service && \
     mkdir -p $ROOTFS/etc/systemd/system/network-online.target.wants/ && \
     ln -s /etc/systemd/system/show-ip.service $ROOTFS/etc/systemd/system/network-online.target.wants/show-ip.service; \
-    wget --header \"Authorization: token ${param_token}\" -O - ${param_bootstrapurl}/files/etc/hosts | sed -e \"s#@@HOSTNAME@@#${HOSTNAME}#g\" > $ROOTFS/etc/hosts && \
+    wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/hosts | sed -e \"s#@@HOSTNAME@@#${HOSTNAME}#g\" > $ROOTFS/etc/hosts && \
     mkdir -p $ROOTFS/etc/systemd/network/ && \
-    wget --header \"Authorization: token ${param_token}\" -O - ${param_bootstrapurl}/files/etc/systemd/network/wired.network > $ROOTFS/etc/systemd/network/wired.network && \
+    wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/systemd/network/wired.network > $ROOTFS/etc/systemd/network/wired.network && \
     sed -i 's#^GRUB_CMDLINE_LINUX_DEFAULT=\"quiet splash\"#GRUB_CMDLINE_LINUX_DEFAULT=\"kvmgt vfio-iommu-type1 vfio-mdev i915.enable_gvt=1 kvm.ignore_msrs=1 intel_iommu=on drm.debug=0\"#' $ROOTFS/etc/default/grub && \
     echo \"${HOSTNAME}\" > $ROOTFS/etc/hostname && \
     echo \"LANG=en_US.UTF-8\" >> $ROOTFS/etc/default/locale && \
@@ -462,51 +467,12 @@ fi
 # --- Create system-docker database on $ROOTFS ---
 run "Preparing system-docker database" \
     "mkdir -p $ROOTFS/var/lib/docker && \
-    docker run -d --privileged --name system-docker ${DOCKER_PROXY_ENV} -v $ROOTFS/var/lib/docker:/var/lib/docker docker:dind ${REGISTRY_MIRROR}" \
+    docker run -d --privileged --name system-docker ${DOCKER_PROXY_ENV} -v $ROOTFS/var/lib/docker:/var/lib/docker docker:18.06-dind ${REGISTRY_MIRROR}" \
     "$TMP/provisioning.log"
 
-# --- Pull any and load any system images ---
-for image in $pull_sysdockerimagelist; do
-    run "Installing system-docker image $image" \
-        "docker exec -i system-docker docker pull $image" \
-        "$TMP/provisioning.log"
-done
-
-for image in $wget_sysdockerimagelist; do
-    run "Installing system-docker image $image" \
-        "wget -O- $image 2>> $TMP/provisioning.log | docker exec -i system-docker docker load" \
-        "$TMP/provisioning.log"
-done
-
-# --- Preload Software Stack ---
+# --- Installing docker compose ---
 run "Installing Docker Compose" \
     "mkdir -p $ROOTFS/usr/local/bin/ && \
     wget -O $ROOTFS/usr/local/bin/docker-compose \"https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)\" && \
     chmod a+x $ROOTFS/usr/local/bin/docker-compose" \
     "$TMP/provisioning.log"
-
-# Add here any software you want pre installed.
-
-# --- Cleanup ---
-if [ $freemem -lt 6291456 ]; then
-    run "Cleaning up" \
-        "killall dockerd &&
-        sleep 3 &&
-        swapoff $ROOTFS/swap &&
-        rm $ROOTFS/swap &&
-        rm -fr $ROOTFS/tmp/" \
-        "$TMP/provisioning.log"
-fi
-
-umount $BOOTFS &&
-umount $ROOTFS &&
-
-if [[ $param_diskencrypt == 'true' ]]; then
-    cryptsetup luksClose root 2>&1 | tee -a /dev/tty0
-fi
-
-if [[ $param_release == 'prod' ]]; then
-    poweroff
-else
-    reboot
-fi
