@@ -1,0 +1,77 @@
+---
+
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Note that all fields for all items must be filled in, unless you omit
+# the entire section. For example, you cannot omit 'type' from an object in
+# the 'base_os_files' section; you must put the word "Other" or "None". Or,
+# if the section is not needed, delete the entire thing.
+
+# Items in 'base_os_files' will be pushed to two locations accessible over the
+# local network
+#   http://@@EDGEBUILDER_IP@@/tftp/images/${PROFILE_NAME}/
+#   (tftp protocol) /images/${PROFILE_NAME}/
+# Both a 'kernel' and 'initrd' must be specified if you plan to use your own.
+# Otherwise, the utility OS will be used.
+base_os_files:
+  - url: https://github.com/rancher/os/releases/download/v1.5.1/vmlinuz
+    type: kernel
+    filename: vmlinuz
+  - url: https://github.com/rancher/os/releases/download/v1.5.1/initrd
+    type: initrd
+    filename: initrd
+  - url: https://google.com
+    type: other
+    filename: google.html
+
+# Items in 'general_files' will be retrieved using wget. Tokens are passed in
+# as headers. These files will be accessible at
+# http://@@EDGEBUILDER_IP@@/files/*
+general_files:
+  - url: https://google.com
+    destination_file: google.html
+    token: None
+  - url: https://github.com/
+    destination_file: github.html
+    token: asdf
+
+# Items in 's3_files' will be retrieved using aws-cli.
+# These files will also be accessible at
+# http://@@EDGEBUILDER_IP@@/files/*
+s3_files:
+  - aws_access_key: ASDFASDFASDFASDF
+    aws_secret_key: ASDFASDFASDFASDFASDFASDFA
+    aws_region: us-west-2
+    bucket: an-aws-bucket
+    object: some-dir/some-aws-object
+    destination_file: some_filename
+
+# These files are retrieved from the public Docker hub.
+# Currently these files can go anywhere.
+public_docker_images:
+  - image: alpine:latest
+    tag: alpine:latest
+    destination_file: alpine_latest.tar
+
+# These files are retrieved from a private AWS ECR.
+# Currently these files can go anywhere.
+private_docker_aws_images:
+  - image: helloworld:latest
+    docker_registry: ASDF.dkr.ecr.us-west-2.amazonaws.com
+    aws_access_key: ASDFASDFASDF
+    aws_secret_key: ASDF/ASDFASDFASDF/ASDFASDF
+    aws_region: us-west-2
+    aws_registry: 999999999999
+    tag: helloworld
+    destination_file: helloworld.tar
+
+# These files are retrieved from a Docker registry.
+# Currently these files can go anywhere.
+private_docker_registry_images:
+  - image: helloworld:latest
+    tag: universe/helloworld:latest
+    destination_file: helloworld.tar.gz
+    docker_registry: hub.docker.site.com
+    docker_username: registryuser
+    docker_password: asdfasdfasfasfasdfasf
