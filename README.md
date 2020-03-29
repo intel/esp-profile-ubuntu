@@ -2,7 +2,7 @@
 
 <img align="right" src="https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png">
 
-Intended to be used with Retail Node Installer and Ubuntu base profile, this Ubuntu OS profile contains a few files that ultimately will install Ubuntu OS to disk.
+Intended to be used with [Retail Node Installer](https://github.com/intel/retail-node-installer) and Ubuntu base profile, this Ubuntu OS profile contains a few files that ultimately will install Ubuntu OS to disk.
 
 ## Software Stack in this profile
 
@@ -54,11 +54,11 @@ The following kernel parameters can be added to `conf/config.yml`
 # are empty. Otherwise, this application will not be configured properly.
 profiles:
   - git_remote_url: https://github.com/intel/rni-profile-base-ubuntu.git
-    profile_branch: desktop
+    profile_branch: slim
     profile_base_branch: master
     git_username: ""
     git_token: ""
-    name: ubuntu_profile
+    name: Ubuntu_with_Docker
     custom_git_arguments: --depth=1
 ```
 
@@ -98,3 +98,4 @@ Currently the following variables are processed:
 A profile **must** have all of the following:
 
 * a `bootstrap.sh` file at the root of the repository
+* a `profile.sh` file at the root of the repository
