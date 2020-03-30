@@ -163,19 +163,7 @@ fi
 export freemem=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 
 # --- Detect HDD ---
-if [ -d /sys/block/[vsh]da ]; then
-	export DRIVE=$(echo /dev/$(ls -l /sys/block/[vsh]da | grep -v usb | head -n1 | sed 's/^.*\([vsh]d[a-z]\+\).*$/\1/'))
-	if [[ $param_parttype == 'efi' ]]; then
-		export EFI_PARTITION=${DRIVE}1
-		export BOOT_PARTITION=${DRIVE}2
-		export SWAP_PARTITION=${DRIVE}3
-		export ROOT_PARTITION=${DRIVE}4
-	else
-		export BOOT_PARTITION=${DRIVE}1
-		export SWAP_PARTITION=${DRIVE}2
-		export ROOT_PARTITION=${DRIVE}3
-	fi
-elif [ -d /sys/block/nvme[0-9]n[0-9] ]; then
+if [ -d /sys/block/nvme[0-9]n[0-9] ]; then
 	export DRIVE=$(echo /dev/$(ls -l /sys/block/nvme* | grep -v usb | head -n1 | sed 's/^.*\(nvme[a-z0-1]\+\).*$/\1/'))
 	if [[ $param_parttype == 'efi' ]]; then
 		export EFI_PARTITION=${DRIVE}p1
@@ -186,6 +174,18 @@ elif [ -d /sys/block/nvme[0-9]n[0-9] ]; then
 		export BOOT_PARTITION=${DRIVE}p1
 		export SWAP_PARTITION=${DRIVE}p2
 		export ROOT_PARTITION=${DRIVE}p3
+	fi
+elif [ -d /sys/block/[vsh]da ]; then
+	export DRIVE=$(echo /dev/$(ls -l /sys/block/[vsh]da | grep -v usb | head -n1 | sed 's/^.*\([vsh]d[a-z]\+\).*$/\1/'))
+	if [[ $param_parttype == 'efi' ]]; then
+		export EFI_PARTITION=${DRIVE}1
+		export BOOT_PARTITION=${DRIVE}2
+		export SWAP_PARTITION=${DRIVE}3
+		export ROOT_PARTITION=${DRIVE}4
+	else
+		export BOOT_PARTITION=${DRIVE}1
+		export SWAP_PARTITION=${DRIVE}2
+		export ROOT_PARTITION=${DRIVE}3
 	fi
 elif [ -d /sys/block/mmcblk[0-9] ]; then
 	export DRIVE=$(echo /dev/$(ls -l /sys/block/mmcblk[0-9] | grep -v usb | head -n1 | sed 's/^.*\(mmcblk[0-9]\+\).*$/\1/'))
@@ -467,12 +467,12 @@ fi
 # --- Create system-docker database on $ROOTFS ---
 run "Preparing system-docker database" \
     "mkdir -p $ROOTFS/var/lib/docker && \
-    docker run -d --privileged --name system-docker ${DOCKER_PROXY_ENV} -v $ROOTFS/var/lib/docker:/var/lib/docker docker:18.06-dind ${REGISTRY_MIRROR}" \
+    docker run -d --privileged --name system-docker ${DOCKER_PROXY_ENV} -v $ROOTFS/var/lib/docker:/var/lib/docker docker:stable-dind ${REGISTRY_MIRROR}" \
     "$TMP/provisioning.log"
 
 # --- Installing docker compose ---
 run "Installing Docker Compose" \
     "mkdir -p $ROOTFS/usr/local/bin/ && \
-    wget -O $ROOTFS/usr/local/bin/docker-compose \"https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)\" && \
+    wget -O $ROOTFS/usr/local/bin/docker-compose \"https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)\" && \
     chmod a+x $ROOTFS/usr/local/bin/docker-compose" \
     "$TMP/provisioning.log"
