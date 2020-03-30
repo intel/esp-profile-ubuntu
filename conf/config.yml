@@ -1,0 +1,6 @@
+---
+
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+kernel_arguments: diskencrypt=false release=prod ubuntuversion=bionic arch=amd64 username=sys-admin password=P@ssw0rd!
