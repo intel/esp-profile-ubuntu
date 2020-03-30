@@ -282,7 +282,9 @@ else
     export TMP=/build
 fi
 
-if [ $(wget http://${PROVISIONER}:5000/v2/_catalog -O-) ] 2>/dev/null; then
+if [ $(wget http://${PROVISIONER}:5557/v2/_catalog -O-) ] 2>/dev/null; then
+    export REGISTRY_MIRROR="--registry-mirror=http://${PROVISIONER}:5557"
+elif [ $(wget http://${PROVISIONER}:5000/v2/_catalog -O-) ] 2>/dev/null; then
     export REGISTRY_MIRROR="--registry-mirror=http://${PROVISIONER}:5000"
 fi
 
