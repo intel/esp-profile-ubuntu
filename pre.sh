@@ -366,7 +366,7 @@ else
 fi
 
 # --- Enabling Ubuntu boostrap items ---
-HOSTNAME="ubuntu-$(tr </dev/urandom -dc a-f0-9 | head -c5)"
+HOSTNAME="ubuntu-$(tr </dev/urandom -dc a-f0-9 | head -c10)"
 run "Enabling Ubuntu boostrap items" \
     "wget --header \"Authorization: token ${param_token}\" -O $ROOTFS/etc/systemd/system/show-ip.service ${param_basebranch}/systemd/show-ip.service && \
     mkdir -p $ROOTFS/etc/systemd/system/network-online.target.wants/ && \
