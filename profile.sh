@@ -36,36 +36,6 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
         apt install -y ${ubuntu_packages}\"'" \
     ${PROVISION_LOG}
 
-# --- Install Docker ---
-run "Installing Docker on Ubuntu ${param_ubuntuversion}" \
-    "docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v /dev:/dev -v /sys/:/sys/ -v $ROOTFS:/target/root ubuntu:${param_ubuntuversion} sh -c \
-    'mount --bind dev /target/root/dev && \
-    mount -t proc proc /target/root/proc && \
-    mount -t sysfs sysfs /target/root/sys && \
-    LANG=C.UTF-8 chroot /target/root sh -c \
-        \"$( echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
-        export DEBIAN_FRONTEND=noninteractive && \
-        apt install -y \
-            apt-transport-https \
-            ca-certificates \
-            curl \
-            gnupg-agent \
-            software-properties-common && \
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - && \
-        apt-key fingerprint 0EBFCD88 && \
-        sudo add-apt-repository \\\"deb [arch=amd64] https://download.docker.com/linux/ubuntu ${DOCKER_UBUNTU_RELEASE} stable\\\" && \
-        apt-get update && \
-        apt-get install -y docker-ce docker-ce-cli containerd.io\"'" \
-    ${PROVISION_LOG}
-
-run "Installing Docker Compose" "mkdir -p $ROOTFS/usr/local/bin/ && \
-wget -O $ROOTFS/usr/local/bin/docker-compose \"https://github.com/docker/compose/releases/download/1.25.4.0/docker-compose-$(uname -s)-$(uname -m)\" && \
-chmod a+x $ROOTFS/usr/local/bin/docker-compose" "$TMP/provisioning.log"
-
-# --- Create system-docker database on $ROOTFS ---
-run "Preparing system-docker database" "mkdir -p $ROOTFS/var/lib/docker && \
-docker run -d --privileged --name system-docker ${DOCKER_PROXY_ENV} -v $ROOTFS/var/lib/docker:/var/lib/docker docker:stable-dind ${REGISTRY_MIRROR}" "$TMP/provisioning.log"
-
 # --- Pull any and load any system images ---
 for image in $pull_sysdockerimagelist; do
 	run "Installing system-docker image $image" "docker exec -i system-docker docker pull $image" "$TMP/provisioning.log"
