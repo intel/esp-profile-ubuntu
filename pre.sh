@@ -200,7 +200,7 @@ elif [ -d /sys/block/mmcblk[0-9] ]; then
 		export ROOT_PARTITION=${DRIVE}p3
 	fi
 else
-	echo "No supported drives found!" 2>&1 | tee -a /dev/tty0
+	echo "No supported drives found!" 2>&1 | tee -a /dev/console
 	sleep 300
 	reboot
 fi
@@ -210,11 +210,11 @@ export ROOTFS=/target/root
 mkdir -p $BOOTFS
 mkdir -p $ROOTFS
 
-echo "" 2>&1 | tee -a /dev/tty0
-echo "" 2>&1 | tee -a /dev/tty0
-echo "Installing on ${DRIVE}" 2>&1 | tee -a /dev/tty0
-echo "" 2>&1 | tee -a /dev/tty0
-echo "" 2>&1 | tee -a /dev/tty0
+echo "" 2>&1 | tee -a /dev/console
+echo "" 2>&1 | tee -a /dev/console
+echo "Installing on ${DRIVE}" 2>&1 | tee -a /dev/console
+echo "" 2>&1 | tee -a /dev/console
+echo "" 2>&1 | tee -a /dev/console
 
 # --- Partition HDD ---
 run "Partitioning drive ${DRIVE}" \
@@ -277,6 +277,7 @@ fi
 if [ $freemem -lt 6291456 ]; then
     mkdir -p $ROOTFS/tmp
     export TMP=$ROOTFS/tmp
+    export PROVISION_LOG="$TMP/provisioning.log"
 else
     mkdir -p /build
     export TMP=/build
@@ -296,7 +297,7 @@ run "Configuring Image Database" \
     /usr/local/bin/dockerd ${REGISTRY_MIRROR} --data-root=$ROOTFS/tmp/docker > /dev/null 2>&1 &" \
     "$TMP/provisioning.log"
 
-sleep 2
+while (! docker ps > /dev/null ); do sleep 0.5; done
 
 # --- Begin Ubuntu Install Process ---
 run "Preparing Ubuntu ${param_ubuntuversion} installer" \
@@ -313,29 +314,34 @@ if [[ $param_parttype == 'efi' ]]; then
         mount -t proc proc /target/root/proc && \
         mount -t sysfs sysfs /target/root/sys && \
         LANG=C.UTF-8 chroot /target/root sh -c \
-        \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
-        export DEBIAN_FRONTEND=noninteractive && \
-        mount ${BOOT_PARTITION} /boot && \
-        mount ${EFI_PARTITION} /boot/efi && \
-        echo \\\"deb http://security.ubuntu.com/ubuntu ${param_ubuntuversion}-security main\\\" >> /etc/apt/sources.list  && \
-        echo \\\"deb-src http://security.ubuntu.com/ubuntu ${param_ubuntuversion}-security main\\\" >> /etc/apt/sources.list  && \
-        apt update && \
-        apt install -y wget linux-image-generic && \
-        apt install -y grub-efi shim && \
-        \\\$(grub-install ${EFI_PARTITION} --target=x86_64-efi --efi-directory=/boot/efi --bootloader=ubuntu; exit 0) && \
-        echo \\\"search.fs_uuid $(lsblk -no UUID ${BOOT_PARTITION}) root\nset prefix=(\\\\\\\$root)\\\\\\\"/grub\\\\\\\"\nconfigfile \\\\\\\$prefix/grub.cfg\\\" > /boot/efi/EFI/ubuntu/grub.cfg && \
-        update-grub && \
-        adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
-        addgroup --system admin && \
-        echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
-        usermod -a -G admin ${param_username} && \
-        apt install -y tasksel && \
-        tasksel install ${ubuntu_bundles} && \
-        apt install -y ${ubuntu_packages} && \
-        apt clean\"' && \
+            \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
+            export DEBIAN_FRONTEND=noninteractive && \
+            chmod a+rw /dev/null /dev/zero && \
+            mount ${BOOT_PARTITION} /boot && \
+            mount ${EFI_PARTITION} /boot/efi && \
+            echo \\\"deb http://archive.ubuntu.com/ubuntu ${param_ubuntuversion} main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb-src http://archive.ubuntu.com/ubuntu ${param_ubuntuversion} main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb http://archive.ubuntu.com/ubuntu ${param_ubuntuversion}-security main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb-src http://archive.ubuntu.com/ubuntu ${param_ubuntuversion}-security main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            apt update && \
+            apt install -y wget linux-image-generic && \
+            apt install -y grub-efi shim && \
+            \\\$(grub-install ${EFI_PARTITION} --target=x86_64-efi --efi-directory=/boot/efi --bootloader=ubuntu; exit 0) && \
+            echo \\\"search.fs_uuid $(lsblk -no UUID ${BOOT_PARTITION}) root\nset prefix=(\\\\\\\$root)\\\\\\\"/grub\\\\\\\"\nconfigfile \\\\\\\$prefix/grub.cfg\\\" > /boot/efi/EFI/ubuntu/grub.cfg && \
+            update-grub && \
+            adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
+            addgroup --system admin && \
+            echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
+            usermod -a -G admin ${param_username} && \
+            apt install -y tasksel && \
+            tasksel install ${ubuntu_bundles} && \
+            apt install -y ${ubuntu_packages} && \
+            apt clean\"' && \
         wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab && \
         echo \"${EFI_PARTITION}  /boot/efi       vfat    umask=0077      0       1\" >> $ROOTFS/etc/fstab" \
         "$TMP/provisioning.log"
+
+    export MOUNT_DURING_INSTALL="chmod a+rw /dev/null /dev/zero && mount ${BOOT_PARTITION} /boot && mount ${EFI_PARTITION} /boot/efi"
 else
     run "Installing Ubuntu ${param_ubuntuversion} (~10 min)" \
         "docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v /dev:/dev -v /sys/:/sys/ -v $ROOTFS:/target/root ubuntu:${param_ubuntuversion} sh -c \
@@ -346,25 +352,30 @@ else
         mount -t proc proc /target/root/proc && \
         mount -t sysfs sysfs /target/root/sys && \
         LANG=C.UTF-8 chroot /target/root sh -c \
-        \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
-        export DEBIAN_FRONTEND=noninteractive && \
-        mount ${BOOT_PARTITION} /boot && \
-        echo \\\"deb http://security.ubuntu.com/ubuntu ${param_ubuntuversion}-security main\\\" >> /etc/apt/sources.list  && \
-        echo \\\"deb-src http://security.ubuntu.com/ubuntu ${param_ubuntuversion}-security main\\\" >> /etc/apt/sources.list  && \
-        apt update && \
-        apt install -y wget linux-image-generic && \
-        apt install -y grub-pc && \
-        grub-install ${DRIVE} && \
-        adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
-        addgroup --system admin && \
-        echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
-        usermod -a -G admin ${param_username} && \
-        apt install -y tasksel && \
-        tasksel install ${ubuntu_bundles} && \
-        apt install -y ${ubuntu_packages} && \
-        apt clean\"' && \
+            \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
+            export DEBIAN_FRONTEND=noninteractive && \
+            chmod a+rw /dev/null /dev/zero && \
+            mount ${BOOT_PARTITION} /boot && \
+            echo \\\"deb http://archive.ubuntu.com/ubuntu ${param_ubuntuversion} main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb-src http://archive.ubuntu.com/ubuntu ${param_ubuntuversion} main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb http://archive.ubuntu.com/ubuntu ${param_ubuntuversion}-security main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            echo \\\"deb-src http://archive.ubuntu.com/ubuntu ${param_ubuntuversion}-security main multiverse universe restricted\\\" >> /etc/apt/sources.list  && \
+            apt update && \
+            apt install -y wget linux-image-generic && \
+            apt install -y grub-pc && \
+            grub-install ${DRIVE} && \
+            adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
+            addgroup --system admin && \
+            echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
+            usermod -a -G admin ${param_username} && \
+            apt install -y tasksel && \
+            tasksel install ${ubuntu_bundles} && \
+            apt install -y ${ubuntu_packages} && \
+            apt clean\"' && \
         wget --header \"Authorization: token ${param_token}\" -O - ${param_basebranch}/files/etc/fstab | sed -e \"s#ROOT#${ROOT_PARTITION}#g\" | sed -e \"s#BOOT#${BOOT_PARTITION}#g\" | sed -e \"s#SWAP#${SWAP_PARTITION}#g\" > $ROOTFS/etc/fstab" \
         "$TMP/provisioning.log"
+
+    export MOUNT_DURING_INSTALL="chmod a+rw /dev/null /dev/zero && mount ${BOOT_PARTITION} /boot"
 fi
 
 # --- Enabling Ubuntu boostrap items ---
