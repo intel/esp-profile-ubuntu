@@ -1,0 +1,111 @@
+---
+
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Note that all fields for all items must be filled in, unless you omit
+# the entire section. For example, you cannot omit 'type' from an object in
+# the 'base_os_files' section; you must put the word "Other" or "None". Or,
+# if the section is not needed, delete the entire thing.
+
+# Items in 'base_os_files' will be pushed to two locations accessible over the
+# local network
+#   http://@@EDGEBUILDER_IP@@/tftp/images/${PROFILE_NAME}/
+#   (tftp protocol) /images/${PROFILE_NAME}/
+# Both a 'kernel' and 'initrd' must be specified if you plan to use your own.
+# Otherwise, the utility OS will be used.
+base_os_files:
+  - url: https://github.com/rancher/os/releases/download/v1.5.1/vmlinuz
+    type: kernel
+    filename: vmlinuz
+  - url: https://github.com/rancher/os/releases/download/v1.5.1/initrd
+    type: initrd
+    filename: initrd
+  - url: https://google.com
+    type: other
+    filename: google.html
+
+# Items in 'general_files' will be retrieved using wget. Tokens are passed in
+# as headers. These files will be accessible at
+# http://@@EDGEBUILDER_IP@@/files/*
+general_files:
+  - url: https://google.com
+    destination_file: google.html
+    token: None
+  - url: https://github.com/
+    destination_file: github.html
+    token: asdf
+
+# Items in 's3_files' will be retrieved using aws-cli.
+# These files will also be accessible at
+# http://@@EDGEBUILDER_IP@@/files/*
+s3_files:
+  - aws_access_key: ASDFASDFASDFASDF
+    aws_secret_key: ASDFASDFASDFASDFASDFASDFA
+    aws_region: us-west-2
+    bucket: an-aws-bucket
+    object: some-dir/some-aws-object
+    destination_file: some_filename
+
+# These files are retrieved from the public Docker hub.
+# Currently these files can go anywhere.
+public_docker_images:
+  - image: alpine:latest
+    tag: alpine:latest
+    destination_file: alpine_latest.tar
+
+# These files are retrieved from a private AWS ECR.
+# Currently these files can go anywhere.
+private_docker_aws_images:
+  - image: helloworld:latest
+    docker_registry: ASDF.dkr.ecr.us-west-2.amazonaws.com
+    aws_access_key: ASDFASDFASDF
+    aws_secret_key: ASDF/ASDFASDFASDF/ASDFASDF
+    aws_region: us-west-2
+    aws_registry: 999999999999
+    tag: helloworld
+    destination_file: helloworld.tar
+
+# These files are retrieved from a Docker registry.
+# Currently these files can go anywhere.
+private_docker_registry_images:
+  - image: helloworld:latest
+    tag: universe/helloworld:latest
+    destination_file: helloworld.tar.gz
+    docker_registry: hub.docker.site.com
+    docker_username: registryuser
+    docker_password: asdfasdfasfasfasdfasf
+
+# Items in 'git_repos' will be retrieved using git.
+# These files will be accessible at
+# http://mirror:mirror@{RNI_IP}:3003/mirror/{PROFILE_NAME}___{REPO_NAME}/raw/branch/master/*
+# Example URL with below values:
+#     http://mirror:mirror@192.168.1.10:3003/mirror/Clear-Linux___rni/raw/branch/master/*
+git_repos:
+  - git_url: https://github.com/intel/retail-node-installer.git
+    # git_branch will default to master if left blank
+    git_branch: master
+    # git_username is optional
+    git_username: 
+    # git_passowrd_or_token is optional
+    git_passowrd_or_token: 
+    # custom_git_arguments will default to "--depth=1" if left blank
+    custom_git_arguments: --depth=1
+    # mirror_repo_name will default to repo name if left blank. The only characters allowed are a-z, A-Z, 0-9, - and _
+    mirror_repo_name: rni
+
+# Items in 'build' will run the 'execute' line inside the container.  The results of the build process should be saved at /opt/output inside the container and 
+# these files will be accessible at
+# http://{RNI_IP}/files/{PROFILE_NAME}/build/*
+# Example URL with below values:
+#     http://192.168.1.10/files/Clear-Linux___rni/build/*
+build:
+  # Identify the container to run the build process in
+  - container: ubuntu:18.04
+      # Entrypoint of override, this is optional
+      entrypoint:
+      # Interrupter to use for execution
+      cmd: bash -c
+      # Script to run from the /build/ folder
+      execute: start.sh
+     

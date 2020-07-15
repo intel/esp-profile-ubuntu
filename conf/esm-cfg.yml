@@ -1,0 +1,6 @@
+---
+
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+esh_arguments: product_key= docker_registry= portainer_url= portainer_admin_username= portainer_admin_password=
