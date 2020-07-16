@@ -24,7 +24,7 @@ Intended to be used with [Retail Node Installer](https://github.com/intel/retail
 
 **A necessary prerequisite to using this profile is having an Retail Node Installer deployed**. Please refer to Retail Node Installer project documentation for [installation](https://github.com/intel/retail-node-installer) in order to deploy it.
 
-**Private docker registry server should be deployed before using profile**. Docker registry server should have required docker images also avialable. Please refer docker registry documentation[https://docs.docker.com/registry/deploying] in order to deploy it. Configure required user input fields in conf/esm-conf.yml before using profile.
+**Private docker registry server should be deployed before using profile**. Docker registry server should have required docker images also available. Please refer docker registry documentation[https://docs.docker.com/registry/deploying] in order to deploy it. Configure required user input fields in conf/esm-conf.yml before using profile.
 
 Out of the box, the Ubuntu profile should _just work_. Therefore, no specific steps are required in order to use this profile that have not already been described in the Retail Node Installer documentation. Simply boot a client device using legacy BIOS PXE boot and the Ubuntu profile should automatically launch after a brief waiting period.
 
