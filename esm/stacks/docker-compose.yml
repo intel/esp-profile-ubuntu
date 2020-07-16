@@ -1,0 +1,27 @@
+---
+
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: "3"
+
+services:
+  esh-recipe-installer:
+    image: ${DOCKER_REGISTRY}/esh-installer:latest
+    environment:
+      - PRODUCT_KEY=${PRODUCT_KEY}
+      - COMMAND=install
+      - RECIPE=edge_insights_industrial
+      - ID=
+      - DEBIAN_FRONTEND=noninteractive
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+      - USER=admin
+    volumes:
+      - /dev:/dev
+      - /sys/:/sys/
+      - /:/target/root
+    network_mode: host
+    privileged: true
+    hostname: admin
+    restart: "no"
