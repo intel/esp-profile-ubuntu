@@ -13,8 +13,10 @@ ubuntu_bundles="openssh-server"
 ubuntu_packages=""
 
 # --- List out any docker images you want pre-installed separated by spaces. ---
-pull_sysdockerimagelist="\
-    portainer/agent:1.6.0"
+#pull_sysdockerimagelist="\
+#    portainer/agent:1.6.0"
+
+pull_sysdockerimagelist=""
 
 # --- List out any docker tar images you want pre-installed separated by spaces.  We be pulled by wget. ---
 wget_sysdockerimagelist=""
@@ -38,7 +40,7 @@ run "Reading Edge Configuration Paramteres" \
     "wget -O /opt/esm-cfg.yml ${param_bootstrapurl}/conf/esm-cfg.yml" \
     ${PROVISION_LOG}
     
-esm_params=$(cat /opt/esm-cfg.yml)
+esm_params=$(cat /proc/cmdline)
 
 if [[ $esm_params == *"product_key="* ]]; then
     tmp="${esm_params##*product_key=}"
@@ -49,6 +51,8 @@ if [[ $esm_params == *"docker_registry="* ]]; then
     tmp="${esm_params##*docker_registry=}"
     export param_docker_registry="${tmp%% *}"
 fi
+
+: <<'END'
 
 if [[ $esm_params == *"portainer_url="* ]]; then
     tmp="${esm_params##*portainer_url=}"
@@ -65,6 +69,8 @@ if [[ $esm_params == *"portainer_admin_password="* ]]; then
     export param_portainer_admin_password="${tmp%% *}"
 fi
 
+
+
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
     PRODUCT_KEY=${param_product_key}\n\
@@ -73,6 +79,13 @@ run "Writing Edge Configuration Paramteres to Environment Variables" \
     PORTAINER_ADMIN_USERNAME=${param_portainer_admin_username}\n\
     PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
      ${PROVISION_LOG}
+
+END
+
+run "Writing Edge Configuration Paramteres to Environment Variables" \
+    "echo -e '\
+    PRODUCT_KEY=${param_product_key}\n\
+    DOCKER_REGISTRY=${param_docker_registry}'>> $ROOTFS/etc/environment_profile" \
 
 chmod 600 $ROOTFS/etc/environment_profile
 
