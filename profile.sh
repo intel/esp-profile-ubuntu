@@ -36,9 +36,9 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
     ${PROVISION_LOG}
 
 # --- Get ESH parameters
-run "Reading Edge Configuration Paramteres" \
-    "wget -O /opt/esm-cfg.yml ${param_bootstrapurl}/conf/esm-cfg.yml" \
-    ${PROVISION_LOG}
+#run "Reading Edge Configuration Paramteres" \
+#    "wget -O /opt/esm-cfg.yml ${param_bootstrapurl}/conf/esm-cfg.yml" \
+#    ${PROVISION_LOG}
     
 esm_params=$(cat /proc/cmdline)
 
@@ -52,35 +52,33 @@ if [[ $esm_params == *"docker_registry="* ]]; then
     export param_docker_registry="${tmp%% *}"
 fi
 
-: <<'END'
 
-if [[ $esm_params == *"portainer_url="* ]]; then
-    tmp="${esm_params##*portainer_url=}"
-    export param_portainer_url="${tmp%% *}"
-fi
+#if [[ $esm_params == *"portainer_url="* ]]; then
+#    tmp="${esm_params##*portainer_url=}"
+#    export param_portainer_url="${tmp%% *}"
+#fi
 
-if [[ $esm_params == *"portainer_admin_username="* ]]; then
-    tmp="${esm_params##*portainer_admin_username=}"
-    export param_portainer_admin_username="${tmp%% *}"
-fi
+#if [[ $esm_params == *"portainer_admin_username="* ]]; then
+#    tmp="${esm_params##*portainer_admin_username=}"
+#    export param_portainer_admin_username="${tmp%% *}"
+#fi
 
-if [[ $esm_params == *"portainer_admin_password="* ]]; then
-    tmp="${esm_params##*portainer_admin_password=}"
-    export param_portainer_admin_password="${tmp%% *}"
-fi
-
+#if [[ $esm_params == *"portainer_admin_password="* ]]; then
+#    tmp="${esm_params##*portainer_admin_password=}"
+#    export param_portainer_admin_password="${tmp%% *}"
+#fi
 
 
-run "Writing Edge Configuration Paramteres to Environment Variables" \
-    "echo -e '\
-    PRODUCT_KEY=${param_product_key}\n\
-    DOCKER_REGISTRY=${param_docker_registry}\n\
-    PORTAINER_URL=${param_portainer_url}\n\
-    PORTAINER_ADMIN_USERNAME=${param_portainer_admin_username}\n\
-    PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
-     ${PROVISION_LOG}
 
-END
+#run "Writing Edge Configuration Paramteres to Environment Variables" \
+#    "echo -e '\
+#    PRODUCT_KEY=${param_product_key}\n\
+#    DOCKER_REGISTRY=${param_docker_registry}\n\
+#    PORTAINER_URL=${param_portainer_url}\n\
+#    PORTAINER_ADMIN_USERNAME=${param_portainer_admin_username}\n\
+#    PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
+#     ${PROVISION_LOG}
+
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
