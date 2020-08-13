@@ -84,6 +84,7 @@ run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
     PRODUCT_KEY=${param_product_key}\n\
     DOCKER_REGISTRY=${param_docker_registry}'>> $ROOTFS/etc/environment_profile" \
+    ${PROVISION_LOG}
 
 chmod 600 $ROOTFS/etc/environment_profile
 
