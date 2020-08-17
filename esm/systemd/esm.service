@@ -5,14 +5,14 @@
 Description=Edge Software Management Tool
 Requires=docker.service
 After=docker.service
-ConditionPathExists=!/opt/edge_insights_industrial
+ConditionPathExists=!/opt/esm/src/esm
 
 [Service]
 Type=oneshot
 User=root
 EnvironmentFile=/etc/environment_profile
-#WorkingDirectory=/opt/esm/src
-#ExecStartPre=/opt/esm/src/endpoint.py
+WorkingDirectory=/opt/esm/src
+ExecStartPre=/opt/esm/src/endpoint.py
 ExecStart=/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose.yml --env-file /etc/environment_profile up
 ExecStop=/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose.yml down
 RemainAfterExit=yes
