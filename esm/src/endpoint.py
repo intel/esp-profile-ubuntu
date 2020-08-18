@@ -117,5 +117,6 @@ class EdgeManagerTool(object):
 
 if __name__ == "__main__":
     emt = EdgeManagerTool("esm")
+    #emt.deploy_emt_agents()
     emt.init_swarm()
     emt.deploy_collectd_agent()
