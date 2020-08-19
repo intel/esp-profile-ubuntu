@@ -5,6 +5,7 @@
 Description=Edge Software Management Tool
 Requires=docker.service
 After=docker.service
+After=proc-sys-fs-binfmt_misc.automount
 ConditionPathExists=!/opt/esm/src/esm
 
 [Service]
