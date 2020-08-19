@@ -7,7 +7,7 @@ services:
   collectd:
     image: docker:stable-dind
     hostname: "{{.Node.Hostname}}"
-    command: sh -c "docker run --privileged -h=`hostname` --restart=on-failure -e DEBIAN_FRONTEND=noninteractive  -v /proc:/mnt/proc:ro ${DOCKER_REGISTRY}/collectd"
+    command: sh -c "docker run --privileged -h=`hostname` --restart=on-failure -e DEBIAN_FRONTEND=noninteractive  -v /proc:/mnt/proc:ro --name esm_collectd ${DOCKER_REGISTRY}/collectd"
     networks:
      - agent_network
     volumes:
