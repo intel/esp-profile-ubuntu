@@ -11,7 +11,7 @@ ConditionPathExists=!/opt/esm/src/esm
 Type=oneshot
 User=root
 WorkingDirectory=/opt/esm/src
-ExecStartPre/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose-agent.yml --env-file /etc/environment_profile up
+ExecStartPre=/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose-agent.yml --env-file /etc/environment_profile up
 ExecStart=/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose.yml --env-file /etc/environment_profile up
 ExecStop=/usr/local/bin/docker-compose -f /opt/esm/stacks/docker-compose.yml down
 RemainAfterExit=yes
