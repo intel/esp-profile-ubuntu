@@ -10,7 +10,6 @@ After=systemd-binfmt.service
 ConditionPathExists=!/opt/esm/src/esm
 
 [Service]
-Type=oneshot
 User=root
 EnvironmentFile=/etc/environment_profile
 WorkingDirectory=/opt/esm/src
