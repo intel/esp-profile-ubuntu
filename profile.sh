@@ -79,7 +79,7 @@ fi
 #    PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
 #     ${PROVISION_LOG}
 
-param_hostname= $(cat $ROOTFS/etc/hostname)
+param_hostname=$(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
