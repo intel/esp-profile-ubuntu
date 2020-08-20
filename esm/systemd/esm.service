@@ -4,6 +4,7 @@
 [Unit]
 Description=Edge Software Management Tool
 Requires=docker.service
+Requires=systemd-binfmt.service
 After=docker.service
 After=systemd-binfmt.service
 ConditionPathExists=!/opt/esm/src/esm
