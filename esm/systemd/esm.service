@@ -3,13 +3,12 @@
 
 [Unit]
 Description=Edge Software Management Tool
-Requires=docker.service
-Requires=systemd-binfmt.service
-After=docker.service
-After=systemd-binfmt.service
+Requires=docker.service proc-sys-fs-binfmt_misc.mount
+After=docker.service proc-sys-fs-binfmt_misc.mount
 ConditionPathExists=!/opt/esm/src/esm
 
 [Service]
+Type=oneshot
 User=root
 EnvironmentFile=/etc/environment_profile
 WorkingDirectory=/opt/esm/src
