@@ -13,7 +13,7 @@ services:
     privileged: true
     hostname: $HOSTNAME
     restart: unless-stopped
-       networks:
+    networks:
       - emt_agent_network
     environment:
       - DEBIAN_FRONTEND=noninteractive
