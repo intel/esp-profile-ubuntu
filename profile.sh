@@ -79,10 +79,12 @@ fi
 #    PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
 #     ${PROVISION_LOG}
 
+param_hostname= $(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
     PRODUCT_KEY=${param_product_key}\n\
+    HOSTNAME=${param_hostname}\n\
     DOCKER_REGISTRY=${param_docker_registry}'>> $ROOTFS/etc/environment_profile" \
     ${PROVISION_LOG}
 
