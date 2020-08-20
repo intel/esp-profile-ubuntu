@@ -88,16 +88,25 @@ run "Writing Edge Configuration Paramteres to Environment Variables" \
 
 chmod 600 $ROOTFS/etc/environment_profile
 
+# run "Enable ESM systemd service" \
+#     "mkdir -p $ROOTFS/opt/esm/src && \
+#     mkdir -p $ROOTFS/opt/esm/stacks && \
+#     wget -O $ROOTFS/opt/esm/src/endpoint.py ${param_bootstrapurl}/esm/src/endpoint.py && \
+#     chmod a+x $ROOTFS/opt/esm/src/endpoint.py && \
+#     wget -O $ROOTFS/opt/esm/stacks/docker-compose.yml ${param_bootstrapurl}/esm/stacks/docker-compose.yml && \
+#     wget -O $ROOTFS/opt/esm/stacks/docker-stack.yml ${param_bootstrapurl}/esm/stacks/docker-stack.yml && \
+#     wget -O $ROOTFS/etc/systemd/system/esm.service ${param_bootstrapurl}/esm/systemd/esm.service && \
+#     ln -s /etc/systemd/system/esm.service $ROOTFS/etc/systemd/system/multi-user.target.wants/esm.service" \
+#     ${PROVISION_LOG}
+
 run "Enable ESM systemd service" \
-    "mkdir -p $ROOTFS/opt/esm/src && \
-    mkdir -p $ROOTFS/opt/esm/stacks && \
-    wget -O $ROOTFS/opt/esm/src/endpoint.py ${param_bootstrapurl}/esm/src/endpoint.py && \
-    chmod a+x $ROOTFS/opt/esm/src/endpoint.py && \
+    "mkdir -p $ROOTFS/opt/esm/stacks && \
     wget -O $ROOTFS/opt/esm/stacks/docker-compose.yml ${param_bootstrapurl}/esm/stacks/docker-compose.yml && \
-    wget -O $ROOTFS/opt/esm/stacks/docker-stack.yml ${param_bootstrapurl}/esm/stacks/docker-stack.yml && \
+    wget -O $ROOTFS/opt/esm/stacks/docker-compose-agent.yml ${param_bootstrapurl}/esm/stacks/docker-compose-agent.yml && \
     wget -O $ROOTFS/etc/systemd/system/esm.service ${param_bootstrapurl}/esm/systemd/esm.service && \
     ln -s /etc/systemd/system/esm.service $ROOTFS/etc/systemd/system/multi-user.target.wants/esm.service" \
     ${PROVISION_LOG}
+
 
 run "Add insecure registry conf" \
     "mkdir -p $ROOTFS/etc/docker && \
