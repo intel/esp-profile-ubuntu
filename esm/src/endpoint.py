@@ -105,18 +105,9 @@ class EdgeManagerTool(object):
         status = run(command, stdout=PIPE, stderr=PIPE, shell=True)
         if status.returncode:
             raise EdgeManagerToolException(status.stdout + status.stderr, "Failes to deploy the EMT Agents", command)
-        
-    def deploy_collectd_agent(self):
-        self.log.info("deploy collectd agents")
-        os.environ["no_proxy"] = "localhost"
-        self.log.info("deploy emt stack to docker swarm cluster")
-        command = "docker stack deploy -c /opt/esm/stacks/docker-stack.yml esm"
-        status = run(command, stdout=PIPE, stderr=PIPE, shell=True)
-        if status.returncode:
-            raise EdgeManagerToolException(status.stdout + status.stderr, "Failes to deploy the Collectd Agent", command)
+
 
 if __name__ == "__main__":
     emt = EdgeManagerTool("esm")
-    #emt.deploy_emt_agents()
     emt.init_swarm()
-    emt.deploy_collectd_agent()
+    emt.deploy_emt_agents()
