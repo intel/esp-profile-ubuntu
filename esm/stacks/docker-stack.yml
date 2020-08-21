@@ -4,41 +4,31 @@
 version: "3.4" 
 
 services:
-  collectd:
-    image: docker:stable-dind
-    hostname: "{{.Node.Hostname}}"
-    command: sh -c "docker run --privileged -h=`hostname` --restart=unless-stopped -e DEBIAN_FRONTEND=noninteractive  -v /proc:/mnt/proc:ro --name esm_collectd ${DOCKER_REGISTRY}/collectd"
-    networks:
+ portainer_edge_agent:
+   image: portainer/agent:1.6.0
+   volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+     - /var/lib/docker/volumes:/var/lib/docker/volumes
+     - /:/host
+     - portainer_agent_data:/data
+   environment:
+    - AGENT_CLUSTER_ADDR=tasks.portainer_edge_agent
+    - CAP_HOST_MANAGEMENT=1
+    - EDGE=${EDGE}
+    - EDGE_ID=${EDGE_ID}
+    - EDGE_KEY=${EDGE_KEY}
+   networks:
      - agent_network
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    deploy:
-      mode: global
+   deploy:
+     mode: global
+     placement:
+       constraints: [node.platform.os == linux]
+   
+volumes:
+   portainer_agent_data:
 
 networks:
   agent_network:
     driver: overlay
     attachable: true
  
-#  portainer_edge_agent:
-#    image: portainer/agent:1.6.0
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock
-#      - /var/lib/docker/volumes:/var/lib/docker/volumes
-#      - /:/host
-#      - portainer_agent_data:/data
-#    environment:
-#     - AGENT_CLUSTER_ADDR=tasks.portainer_edge_agent
-#     - CAP_HOST_MANAGEMENT=1
-#     - EDGE=${EDGE}
-#     - EDGE_ID=${EDGE_ID}
-#     - EDGE_KEY=${EDGE_KEY}
-#    networks:
-#      - agent_network
-#    deploy:
-#      mode: global
-#      placement:
-#        constraints: [node.platform.os == linux]
-   
-#volumes:
-#    portainer_agent_data:

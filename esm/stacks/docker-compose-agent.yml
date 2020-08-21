@@ -10,13 +10,13 @@ services:
   collectd:
     image: ${DOCKER_REGISTRY}/collectd:latest
     privileged: true
-    hostname: $HOSTNAME
+    hostname: ${HOSTNAME}
     restart: unless-stopped
     networks:
       - emt_agent_network
     environment:
       - DEBIAN_FRONTEND=noninteractive
-      - system_type=vm
+      - system_type=VM
     volumes:
       - /proc:/mnt/proc
       - /var/run/docker.sock:/var/run/docker.sock
