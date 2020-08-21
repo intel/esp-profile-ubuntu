@@ -1,0 +1,24 @@
+# Copyright (C) 2019 Intel Corporation
+# SPDX-License-Identifier: BSD-3-Clause
+
+version: "3"
+
+networks:
+  emt_agent_network:
+
+services:
+  collectd:
+    image: ${DOCKER_REGISTRY}/collectd:latest
+    privileged: true
+    hostname: ${HOSTNAME}
+    restart: unless-stopped
+    networks:
+      - emt_agent_network
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - system_type=VM
+    volumes:
+      - /proc:/mnt/proc
+      - /var/run/docker.sock:/var/run/docker.sock
+    devices:
+      - /dev/dri:/dev/dri
