@@ -13,9 +13,6 @@ ubuntu_bundles="openssh-server"
 ubuntu_packages=""
 
 # --- List out any docker images you want pre-installed separated by spaces. ---
-#pull_sysdockerimagelist="\
-#    portainer/agent:1.6.0"
-
 pull_sysdockerimagelist=""
 
 # --- List out any docker tar images you want pre-installed separated by spaces.  We be pulled by wget. ---
@@ -35,11 +32,7 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
         apt install -y ${ubuntu_packages}\"'" \
     ${PROVISION_LOG}
 
-# --- Get ESH parameters
-#run "Reading Edge Configuration Paramteres" \
-#    "wget -O /opt/esm-cfg.yml ${param_bootstrapurl}/conf/esm-cfg.yml" \
-#    ${PROVISION_LOG}
-    
+
 esm_params=$(cat /proc/cmdline)
 
 if [[ $esm_params == *"product_key="* ]]; then
@@ -52,33 +45,6 @@ if [[ $esm_params == *"docker_registry="* ]]; then
     export param_docker_registry="${tmp%% *}"
 fi
 
-
-#if [[ $esm_params == *"portainer_url="* ]]; then
-#    tmp="${esm_params##*portainer_url=}"
-#    export param_portainer_url="${tmp%% *}"
-#fi
-
-#if [[ $esm_params == *"portainer_admin_username="* ]]; then
-#    tmp="${esm_params##*portainer_admin_username=}"
-#    export param_portainer_admin_username="${tmp%% *}"
-#fi
-
-#if [[ $esm_params == *"portainer_admin_password="* ]]; then
-#    tmp="${esm_params##*portainer_admin_password=}"
-#    export param_portainer_admin_password="${tmp%% *}"
-#fi
-
-
-
-#run "Writing Edge Configuration Paramteres to Environment Variables" \
-#    "echo -e '\
-#    PRODUCT_KEY=${param_product_key}\n\
-#    DOCKER_REGISTRY=${param_docker_registry}\n\
-#    PORTAINER_URL=${param_portainer_url}\n\
-#    PORTAINER_ADMIN_USERNAME=${param_portainer_admin_username}\n\
-#    PORTAINER_ADMIN_PASSWORD=${param_portainer_admin_password}'>> $ROOTFS/etc/environment_profile" \
-#     ${PROVISION_LOG}
-
 param_hostname=$(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
@@ -89,17 +55,6 @@ run "Writing Edge Configuration Paramteres to Environment Variables" \
     ${PROVISION_LOG}
 
 chmod 600 $ROOTFS/etc/environment_profile
-
-# run "Enable ESM systemd service" \
-#     "mkdir -p $ROOTFS/opt/esm/src && \
-#     mkdir -p $ROOTFS/opt/esm/stacks && \
-#     wget -O $ROOTFS/opt/esm/src/endpoint.py ${param_bootstrapurl}/esm/src/endpoint.py && \
-#     chmod a+x $ROOTFS/opt/esm/src/endpoint.py && \
-#     wget -O $ROOTFS/opt/esm/stacks/docker-compose.yml ${param_bootstrapurl}/esm/stacks/docker-compose.yml && \
-#     wget -O $ROOTFS/opt/esm/stacks/docker-stack.yml ${param_bootstrapurl}/esm/stacks/docker-stack.yml && \
-#     wget -O $ROOTFS/etc/systemd/system/esm.service ${param_bootstrapurl}/esm/systemd/esm.service && \
-#     ln -s /etc/systemd/system/esm.service $ROOTFS/etc/systemd/system/multi-user.target.wants/esm.service" \
-#     ${PROVISION_LOG}
 
 run "Enable ESM systemd service" \
     "mkdir -p $ROOTFS/opt/esm/stacks && \
