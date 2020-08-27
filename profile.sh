@@ -65,9 +65,9 @@ run "Enable ESM systemd service" \
     ${PROVISION_LOG}
 
 
-run "Add insecure registry conf" \
-    "mkdir -p $ROOTFS/etc/docker && \
-    echo '{\"insecure-registries\": [\"${param_docker_registry}\"]}' >$ROOTFS/etc/docker/daemon.json" \
+run "Add CA certificate to docker certs.d directory" \
+    "mkdir -p $ROOTFS/etc/docker/certs.d/${param_docker_registry} && \
+    wget -O $ROOTFS/etc/docker/certs.d/${param_docker_registry}/esm-ca.crt ${param_bootstrapurl}/esm-ca.crt" \
      ${PROVISION_LOG}
      
 # --- Pull any and load any system images ---
