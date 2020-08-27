@@ -9,8 +9,8 @@ set -a
 source /opt/bootstrap/functions
 
 # --- Add Packages
-ubuntu_bundles="openssh-server"
-ubuntu_packages=""
+ubuntu_bundles="ubuntu-desktop openssh-server"
+ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget"
 
 # --- List out any docker images you want pre-installed separated by spaces. ---
 pull_sysdockerimagelist=""
