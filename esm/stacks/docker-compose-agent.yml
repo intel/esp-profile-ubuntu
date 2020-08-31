@@ -16,9 +16,8 @@ services:
       - emt_agent_network
     environment:
       - DEBIAN_FRONTEND=noninteractive
-      - system_type=VM
+      - HOST_TYPE=VM
     volumes:
       - /proc:/mnt/proc
       - /var/run/docker.sock:/var/run/docker.sock
-    devices:
-      - /dev/dri:/dev/dri
+      - /var/tmp:/var/tmp
