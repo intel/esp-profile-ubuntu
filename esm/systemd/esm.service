@@ -5,7 +5,7 @@
 Description=Edge Software Management Tool
 Requires=docker.service proc-sys-fs-binfmt_misc.mount
 After=docker.service proc-sys-fs-binfmt_misc.mount
-ConditionPathExists=!/opt/edge_insights_industrial
+ConditionPathExists=!/opt/emt/edge_insights_industrial
 
 [Service]
 Type=oneshot
