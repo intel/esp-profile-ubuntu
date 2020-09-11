@@ -69,7 +69,13 @@ run "Add CA certificate to docker certs.d directory" \
     "mkdir -p $ROOTFS/etc/docker/certs.d/${param_docker_registry} && \
     wget -O $ROOTFS/etc/docker/certs.d/${param_docker_registry}/esm-ca.crt ${param_bootstrapurl}/esm-ca.crt" \
      ${PROVISION_LOG}
-     
+
+run "Update no_proxy environment variable" \
+    "sed -i 's#^no_proxy=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/environment && \
+    sed -i 's#^NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/environment && \
+    sed -i 's#^NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
+    ${PROVISION_LOG}
+
 # --- Pull any and load any system images ---
 for image in $pull_sysdockerimagelist; do
         run "Installing system-docker image $image" "docker exec -i system-docker docker pull $image" "$TMP/provisioning.log"
