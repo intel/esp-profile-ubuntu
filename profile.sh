@@ -75,8 +75,8 @@ run "Add CA certificate to docker certs.d directory" \
 if [ ! -z "${param_proxy}" ]; then
     run "Update no_proxy environment variable" \
         "sed -i 's#no_proxy=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
-        sed -i 's#NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
-        sed -i 's#NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
+        sed -i 's#NO_PROXY=localhost,127.0.0.1#NO_PROXY=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
+        sed -i 's#NO_PROXY=localhost,127.0.0.1#NO_PROXY=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
         ${PROVISION_LOG}
 fi
 
