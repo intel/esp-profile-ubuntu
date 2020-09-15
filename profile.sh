@@ -8,6 +8,8 @@ set -a
 #this is provided while using Utility OS
 source /opt/bootstrap/functions
 
+PROVISIONER=$1
+
 # --- Add Packages
 ubuntu_bundles="ubuntu-desktop openssh-server"
 ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget"
@@ -72,9 +74,9 @@ run "Add CA certificate to docker certs.d directory" \
 
 if [ ! -z "${param_proxy}" ]; then
     run "Update no_proxy environment variable" \
-        "sed -i 's#^no_proxy=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/environment && \
-        sed -i 's#^NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/environment && \
-        sed -i 's#^NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
+        "sed -i 's#no_proxy=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
+        sed -i 's#NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
+        sed -i 's#NO_PROXY=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
         ${PROVISION_LOG}
 fi
 
