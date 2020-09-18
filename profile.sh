@@ -80,6 +80,18 @@ if [ ! -z "${param_proxy}" ]; then
         ${PROVISION_LOG}
 fi
 
+run "Enabling Serial console" \
+    "sed -i 's#^GRUB_CMDLINE_LINUX_DEFAULT=\"kvmgt vfio-iommu-type1 vfio-mdev i915.enable_gvt=1 kvm.ignore_msrs=1 intel_iommu=on drm.debug=0\"#GRUB_CMDLINE_LINUX_DEFAULT=\"kvmgt vfio-iommu-type1 vfio-mdev i915.enable_gvt=1 kvm.ignore_msrs=1 intel_iommu=on drm.debug=0 console=ttyS0 console=tty0\"#' $ROOTFS/etc/default/grub && \
+    docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v /dev:/dev -v /sys/:/sys/ -v $ROOTFS:/target/root -v $BOOTFS:/target/root/boot ubuntu:${param_ubuntuversion} sh -c \
+    'mount --bind dev /target/root/dev && \
+    mount -t proc proc /target/root/proc && \
+    mount -t sysfs sysfs /target/root/sys && \
+    LANG=C.UTF-8 chroot /target/root sh -c \
+    \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
+    export DEBIAN_FRONTEND=noninteractive && \
+    update-grub\"'" \
+    "$TMP/provisioning.log"
+
 # --- Pull any and load any system images ---
 for image in $pull_sysdockerimagelist; do
         run "Installing system-docker image $image" "docker exec -i system-docker docker pull $image" "$TMP/provisioning.log"
