@@ -9,9 +9,13 @@ services:
   esh-recipe-installer:
     image: ${DOCKER_REGISTRY}/esh-installer:latest
     environment:
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+      - HTTP_PROXY=${HTTP_PROXY}
+      - HTTPS_PROXY=${HTTPS_PROXY}
       - PRODUCT_KEY=${PRODUCT_KEY}
       - COMMAND=install
-      - RECIPE=edge_insights_industrial
+      - RECIPE=edge_insights_vision
       - ID=
       - DEBIAN_FRONTEND=noninteractive
       - LC_ALL=C.UTF-8

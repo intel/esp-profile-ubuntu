@@ -76,7 +76,12 @@ if [ ! -z "${param_proxy}" ]; then
     run "Update no_proxy environment variable" \
         "sed -i 's#no_proxy=localhost,127.0.0.1#no_proxy=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
         sed -i 's#NO_PROXY=localhost,127.0.0.1#NO_PROXY=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/environment && \
-        sed -i 's#NO_PROXY=localhost,127.0.0.1#NO_PROXY=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf" \
+        sed -i 's#NO_PROXY=localhost,127.0.0.1#NO_PROXY=localhost,127.0.0.1,${PROVISIONER}#g' $ROOTFS/etc/systemd/system/docker.service.d/https-proxy.conf && \
+        echo -e '\
+        http_proxy=${param_proxy}\n\
+        https_proxy=${param_proxy}\n\
+        HTTP_PROXY=${param_proxy}\n\
+        HTTPS_PROXY=${param_proxy}' >> $ROOTFS/etc/environment_profile" \
         ${PROVISION_LOG}
 fi
 
