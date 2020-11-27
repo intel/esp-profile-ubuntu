@@ -47,13 +47,19 @@ if [[ $esm_params == *"docker_registry="* ]]; then
     export param_docker_registry="${tmp%% *}"
 fi
 
+if [[ $esm_params == *"edge_id="* ]]; then
+    tmp="${esm_params##*edge_id=}"
+    export param_edge_id="${tmp%% *}"
+fi
+
 param_hostname=$(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
     PRODUCT_KEY=${param_product_key}\n\
     HOSTNAME=${param_hostname}\n\
-    DOCKER_REGISTRY=${param_docker_registry}'>> $ROOTFS/etc/environment_profile" \
+    DOCKER_REGISTRY=${param_docker_registry}\n\
+    EDGE_ID=${param_edge_id}'>> $ROOTFS/etc/environment_profile" \
     ${PROVISION_LOG}
 
 chmod 600 $ROOTFS/etc/environment_profile
