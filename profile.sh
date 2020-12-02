@@ -12,7 +12,7 @@ PROVISIONER=$1
 
 # --- Add Packages
 ubuntu_bundles="ubuntu-desktop openssh-server"
-ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget"
+ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget linux-generic-hwe-18.04 xserver-xorg-core-hwe-18.04"
 
 # --- List out any docker images you want pre-installed separated by spaces. ---
 pull_sysdockerimagelist=""
@@ -28,10 +28,12 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
     mount -t sysfs sysfs /target/root/sys && \
     LANG=C.UTF-8 chroot /target/root sh -c \
         \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
+        mount ${BOOT_PARTITION} /boot && \
         export DEBIAN_FRONTEND=noninteractive && \
         apt install -y tasksel && \
         tasksel install ${ubuntu_bundles} && \
-        apt install -y ${ubuntu_packages}\"'" \
+        apt install -y ${ubuntu_packages} && \
+        update-grub\"'" \
     ${PROVISION_LOG}
 
 
@@ -47,13 +49,19 @@ if [[ $esm_params == *"docker_registry="* ]]; then
     export param_docker_registry="${tmp%% *}"
 fi
 
+if [[ $esm_params == *"edge_id="* ]]; then
+    tmp="${esm_params##*edge_id=}"
+    export param_edge_id="${tmp%% *}"
+fi
+
 param_hostname=$(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
     "echo -e '\
     PRODUCT_KEY=${param_product_key}\n\
     HOSTNAME=${param_hostname}\n\
-    DOCKER_REGISTRY=${param_docker_registry}'>> $ROOTFS/etc/environment_profile" \
+    DOCKER_REGISTRY=${param_docker_registry}\n\
+    EDGE_ID=${param_edge_id}'>> $ROOTFS/etc/environment_profile" \
     ${PROVISION_LOG}
 
 chmod 600 $ROOTFS/etc/environment_profile
