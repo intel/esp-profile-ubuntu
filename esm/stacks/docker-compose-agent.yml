@@ -3,20 +3,16 @@
 
 version: "3"
 
-networks:
-  emt_agent_network:
-
 services:
   collectd:
     image: ${DOCKER_REGISTRY}/collectd:latest
     privileged: true
     hostname: ${HOSTNAME}
     restart: unless-stopped
-    networks:
-      - emt_agent_network
+    network_mode: "host"
     environment:
       - DEBIAN_FRONTEND=noninteractive
-      - HOST_TYPE=VM
+      - HOST_TYPE=VM-${EDGE_ID}
     volumes:
       - /proc:/mnt/proc
       - /var/run/docker.sock:/var/run/docker.sock

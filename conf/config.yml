@@ -3,4 +3,4 @@
 # Copyright (C) 2019 Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
 
-kernel_arguments: diskencrypt=false ubuntuversion=bionic arch=amd64 username=sys-admin password=P@ssw0rd! product_key=ABCDEF docker_registry=127.0.0.1:5000
+kernel_arguments: diskencrypt=false ubuntuversion=bionic arch=amd64 username=sys-admin password=P@ssw0rd! product_key=ABCDEF docker_registry=127.0.0.1:5000 edge_id=XYZABC
