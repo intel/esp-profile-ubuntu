@@ -12,7 +12,7 @@ PROVISIONER=$1
 
 # --- Add Packages
 ubuntu_bundles="ubuntu-desktop openssh-server"
-ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget linux-generic-hwe-18.04 xserver-xorg-core-hwe-18.04"
+ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget"
 
 # --- List out any docker images you want pre-installed separated by spaces. ---
 pull_sysdockerimagelist=""
@@ -33,6 +33,7 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
         apt install -y tasksel && \
         tasksel install ${ubuntu_bundles} && \
         apt install -y ${ubuntu_packages} && \
+        apt install -y --install-recommends linux-generic-hwe-18.04 && \
         update-grub\"'" \
     ${PROVISION_LOG}
 
