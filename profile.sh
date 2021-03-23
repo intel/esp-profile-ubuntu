@@ -55,6 +55,11 @@ if [[ $esm_params == *"edge_id="* ]]; then
     export param_edge_id="${tmp%% *}"
 fi
 
+if [[ $esm_params == *"recipe_container_name="* ]]; then
+    tmp="${esm_params##*recipe_container_name=}"
+    export param_recipe_container_name="${tmp%% *}"
+fi
+
 param_hostname=$(cat $ROOTFS/etc/hostname)
 
 run "Writing Edge Configuration Paramteres to Environment Variables" \
@@ -62,7 +67,8 @@ run "Writing Edge Configuration Paramteres to Environment Variables" \
     PRODUCT_KEY=${param_product_key}\n\
     HOSTNAME=${param_hostname}\n\
     DOCKER_REGISTRY=${param_docker_registry}\n\
-    EDGE_ID=${param_edge_id}'>> $ROOTFS/etc/environment_profile" \
+    EDGE_ID=${param_edge_id}\n\
+    RECIPE_CONTAINER_NAME=${param_recipe_container_name}'>> $ROOTFS/etc/environment_profile" \
     ${PROVISION_LOG}
 
 chmod 600 $ROOTFS/etc/environment_profile
