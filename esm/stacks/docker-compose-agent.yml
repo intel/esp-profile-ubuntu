@@ -13,6 +13,7 @@ services:
     environment:
       - DEBIAN_FRONTEND=noninteractive
       - HOST_TYPE=VM-${EDGE_ID}
+      - HOST_IP=${BUILD_NODE_IP}
     volumes:
       - /proc:/mnt/proc
       - /var/run/docker.sock:/var/run/docker.sock
