@@ -48,6 +48,8 @@ The following kernel parameters can be added to `conf/config.yml`
 * `token` - GitHub token for private repositories, if this profile is in a private respository this token should have access to this repo
 * `username` - Initial user name. Defaults to 'sys-admin'
 * `rwo` - GitHub branch of Retail Workload Orchestrator repository. Defaults to 'master'
+* `docker_login_user` - Add user name of docker hub login if user wants to login to docker hub repository service during provisioning.
+* `docker_login_pass` - Add password of docker hub login if user wants to login to docker hub repository service during provisioning.
 
 ## Sample Profile Section
 
