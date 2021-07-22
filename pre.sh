@@ -152,6 +152,16 @@ else
 	export param_release='dev'
 fi
 
+if [[ $kernel_params == *"docker_login_user="* ]]; then
+	tmp="${kernel_params##*docker_login_user=}"
+	export param_docker_login_user="${tmp%% *}"
+fi
+
+if [[ $kernel_params == *"docker_login_pass="* ]]; then
+	tmp="${kernel_params##*docker_login_pass=}"
+	export param_docker_login_pass="${tmp%% *}"
+fi
+
 if [[ $param_release == 'prod' ]]; then
 	export kernel_params="$param_kernparam" # ipv6.disable=1
 else
@@ -298,6 +308,12 @@ run "Configuring Image Database" \
     "$TMP/provisioning.log"
 
 while (! docker ps > /dev/null ); do sleep 0.5; done
+
+if [ ! -z "${param_docker_login_user}" ] && [ ! -z "${param_docker_login_pass}" ]; then
+    run "Log in to a Docker registry" \
+    	"docker login -u ${param_docker_login_user} -p ${param_docker_login_pass}" \
+    	"$TMP/provisioning.log"
+fi
 
 # --- Begin Ubuntu Install Process ---
 run "Preparing Ubuntu ${param_ubuntuversion} installer" \
