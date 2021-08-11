@@ -5,7 +5,7 @@ version: "3"
 
 services:
   collectd:
-    image: ${DOCKER_REGISTRY}/collectd:latest
+    image: ${DOCKER_REGISTRY}/collectd_esc:latest
     privileged: true
     hostname: ${HOSTNAME}
     restart: unless-stopped
