@@ -1,5 +1,7 @@
 [Match]
 Name=en*
+SSID=@@WPA_SSID@@
 
 [Network]
 DHCP=yes
+

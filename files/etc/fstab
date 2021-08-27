@@ -7,5 +7,5 @@
 # <file system> <mount point>   <type>  <options>       <dump>  <pass>
 ROOT                 /               ext4    errors=remount-ro 0       1
 # /boot was on /dev/vda1 during installation
-BOOT                 /boot           ext4    defaults        0       2
+BOOT
 SWAP                 none            swap    sw              0       0

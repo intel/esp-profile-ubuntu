@@ -7,7 +7,6 @@
 source /opt/bootstrap/functions
 
 # --- Cleanup ---
-
 if [ ! -z "${param_docker_login_user}" ] && [ ! -z "${param_docker_login_pass}" ]; then
     run "Logout from a Docker registry" \
         "docker logout" \
@@ -21,7 +20,7 @@ if [ $freemem -lt 6291456 ]; then
         swapoff $ROOTFS/swap &&
         rm $ROOTFS/swap &&
         while (! rm -fr $ROOTFS/tmp/ > /dev/null ); do sleep 2; done" \
-        "/tmp/provisioning.log"
+        "$TMP/provisioning.log"
 fi
 
 umount $BOOTFS &&

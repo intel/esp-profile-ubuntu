@@ -1,0 +1,6 @@
+[Match]
+Name=wl*
+SSID=@@WPA_SSID@@
+
+[Network]
+Bond=bond0
