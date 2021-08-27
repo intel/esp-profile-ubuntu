@@ -75,3 +75,37 @@ private_docker_registry_images:
     docker_registry: hub.docker.site.com
     docker_username: registryuser
     docker_password: asdfasdfasfasfasdfasf
+
+# Items in 'git_repos' will be retrieved using git.
+# These files will be accessible at
+# http://mirror:mirror@{RNI_IP}:3003/mirror/{PROFILE_NAME}___{REPO_NAME}/raw/branch/master/*
+# Example URL with below values:
+#     http://mirror:mirror@192.168.1.10:3003/mirror/Clear-Linux___rni/raw/branch/master/*
+git_repos:
+  - git_url: https://github.com/intel/retail-node-installer.git
+    # git_branch will default to master if left blank
+    git_branch: master
+    # git_username is optional
+    git_username: 
+    # git_passowrd_or_token is optional
+    git_passowrd_or_token: 
+    # custom_git_arguments will default to "--depth=1" if left blank
+    custom_git_arguments: --depth=1
+    # mirror_repo_name will default to repo name if left blank. The only characters allowed are a-z, A-Z, 0-9, - and _
+    mirror_repo_name: rni
+
+# Items in 'build' will run the 'execute' line inside the container.  The results of the build process should be saved at /opt/output inside the container and 
+# these files will be accessible at
+# http://{RNI_IP}/files/{PROFILE_NAME}/build/*
+# Example URL with below values:
+#     http://192.168.1.10/files/Clear-Linux___rni/build/*
+build:
+  # Identify the container to run the build process in
+  - container: ubuntu:18.04
+      # Entrypoint of override, this is optional
+      entrypoint:
+      # Interrupter to use for execution
+      cmd: bash -c
+      # Script to run from the /build/ folder
+      execute: start.sh
+     
