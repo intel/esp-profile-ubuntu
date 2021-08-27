@@ -31,7 +31,7 @@ The following kernel parameters can be added to `conf/config.yml`
 * `wpapsk` - uOS WPA Pre-Shared Key if no ethernet is found
 * `wifissid` - Target system WiFi SSID
 * `wifipsk` - Target system WiFi Pre-Shared Key
-* `network` - By default this installes a basic network if omitted.  Valid options are `bridged` which enables a bonded bridged networks accross all network devices or `network-manager` which gives management to the Network Manager utility.
+* `network` - By default this installs a basic network if omitted.  Valid options are `bridged` which enables a bonded bridged networks accross all network devices or `network-manager` which gives management to the Network Manager utility.
 
 ## Target Device Prerequisites
 
