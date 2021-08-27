@@ -44,6 +44,8 @@ The following kernel parameters can be added to `conf/config.yml`
 * `release` - [prod | dev] If set to prod the system will shutdown after it is provisioned.  Altnerativily it will reboot.
 * `token` - GitHub token for private repositories, if this profile is in a private respository this token should have access to this repo
 * `username` - Initial user name. Defaults to 'sys-admin'
+* `docker_login_user` - Add user name of docker hub login if user wants to login to docker hub repository service during provisioning.
+* `docker_login_pass` - Add password of docker hub login if user wants to login to docker hub repository service during provisioning.
 
 ## Sample Profile Section
 
