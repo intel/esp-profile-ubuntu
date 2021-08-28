@@ -49,4 +49,4 @@ The following kernel parameters can be added to `conf/config.yml`
 * Currently does not install Secure Boot features
 * Currently the "master" (the base profile), is intended to be used along with the other branch profiles.\
 * Only partitions 1 drive in the target device. It can be made partition as many drives as you want.  Clone the "master" branch, edit file "pre.sh", got to the section "Detect HDD" and modify to your hardware specific situation.
-* All LAN adapters on the system will be configured for DHCP.  Clone the "master" branch, edit file "pre.sh" and "files/etc/systemd/wired.network", search for "wired.network" and modify to your hardware specific situation.
+* All LAN adapters on the system will be configured for DHCP by default.  Use `network` kernel parameter to change to a bonded bridged network with `network=bridged` or use NetworkManager using `network=networkmanager`.
