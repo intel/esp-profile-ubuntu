@@ -4,4 +4,3 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 kernel_arguments: diskencrypt=false release=prod ubuntuversion=focal arch=amd64 username=sys-admin password=P@ssw0rd! epassword=\$6\$RsDAmpXBiF8Ev5ub\$BCEVoMK/MKdUQpJEykScLOgx9S8jw4TZCQyKutCfDQ06Dbk24E1u//ofUWFl39zRTyU8Ex45k634JjNDqCTJh.
-
