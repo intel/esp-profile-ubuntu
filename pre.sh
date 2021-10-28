@@ -171,7 +171,11 @@ else
 	export param_username="sys-admin"
 fi
 
-if [[ $kernel_params == *"password="* ]]; then
+if [[ $kernel_params == *"epassword="* ]]; then
+	tmp="${kernel_params##*epassword=}"
+	temp_param_epassword="${tmp%% *}"
+	export param_epassword=$(echo ${temp_param_epassword} | sed 's/\$/\\\\\\$/g')
+elif [[ $kernel_params == *"password="* ]]; then
 	tmp="${kernel_params##*password=}"
 	export param_password="${tmp%% *}"
 else
@@ -403,7 +407,8 @@ if [[ $param_parttype == 'efi' ]]; then
             update-grub && \
             adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
             addgroup --system admin && \
-            echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
+            if [ ! -z ${param_epassword} ]; then echo \\\"${param_username}:${param_epassword}\\\" | chpasswd -e; \
+            else echo \\\"${param_username}:${param_password}\\\" | chpasswd; fi && \
             usermod -a -G admin ${param_username} && \
             if [ \\\"${ubuntu_tasksel}\\\" != "" ]; then \
                 apt install -y tasksel && \
@@ -445,7 +450,8 @@ else
             grub-install ${DRIVE} && \
             adduser --quiet --disabled-password --shell /bin/bash --gecos \\\"\\\" ${param_username} && \
             addgroup --system admin && \
-            echo \\\"${param_username}:${param_password}\\\" | chpasswd && \
+            if [ ! -z ${param_epassword} ]; then echo \\\"${param_username}:${param_epassword}\\\" | chpasswd -e; \
+            else echo \\\"${param_username}:${param_password}\\\" | chpasswd; fi && \
             usermod -a -G admin ${param_username} && \
             if [ \\\"${ubuntu_tasksel}\\\" != "" ]; then \
                 apt install -y tasksel && \
