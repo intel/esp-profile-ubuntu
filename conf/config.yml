@@ -3,4 +3,4 @@
 # Copyright (C) 2019 Intel Corporation
 # SPDX-License-Identifier: BSD-3-Clause
 
-kernel_arguments: diskencrypt=false release=prod ubuntuversion=focal arch=amd64 username=sys-admin password=P@ssw0rd! epassword=\$6\$Q5mP.pqw5ydDHHGN\$gxx1nGbwCWpyGeO93EnNNr9BqZ9PtwIiuvWoGniU7qq8wG2yfa33xBbmTcKjgZ65XmPno7S4.SOP7XCwOR0gw0
+kernel_arguments: diskencrypt=false release=prod ubuntuversion=focal arch=amd64 username=sys-admin password=P@ssw0rd! epassword=\$6\$RsDAmpXBiF8Ev5ub\$BCEVoMK/MKdUQpJEykScLOgx9S8jw4TZCQyKutCfDQ06Dbk24E1u//ofUWFl39zRTyU8Ex45k634JjNDqCTJh.
