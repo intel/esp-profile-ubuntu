@@ -24,21 +24,25 @@ PROVISIONER=$1
 # --- Get kernel parameters ---
 kernel_params=$(cat /proc/cmdline)
 
-if [[ $kernel_params == *"proxy="* ]]; then
-	tmp="${kernel_params##*proxy=}"
-	export param_proxy="${tmp%% *}"
+if [[ $kernel_params == *" noproxy="* ]]; then
+	tmp="${kernel_params##* noproxy=}"
+	export param_noproxy="${tmp%% *}"
+	export no_proxy="${param_noproxy},${PROVISIONER}"
+	export NO_PROXY="${param_noproxy},${PROVISIONER}"
+fi
 
+if [[ $kernel_params == *" proxy="* ]]; then
+	tmp="${kernel_params##* proxy=}"
+	export param_proxy="${tmp%% *}"
 	export http_proxy=${param_proxy}
 	export https_proxy=${param_proxy}
-	export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
 	export HTTP_PROXY=${param_proxy}
 	export HTTPS_PROXY=${param_proxy}
-	export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
 	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
 	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
 elif [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ] && [ $( nc -vz -w 2 ${PROVISIONER} 4128; echo $?; ) -eq 0 ]; then
 	PROXY_DOCKER_BIND="-v /tmp/ssl:/etc/ssl/ -v /usr/local/share/ca-certificates/EB.pem:/usr/local/share/ca-certificates/EB.crt"
-    export http_proxy=http://${PROVISIONER}:3128/
+	export http_proxy=http://${PROVISIONER}:3128/
 	export https_proxy=http://${PROVISIONER}:4128/
 	export no_proxy="localhost,127.0.0.1,${PROVISIONER}"
 	export HTTP_PROXY=http://${PROVISIONER}:3128/
@@ -46,8 +50,8 @@ elif [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ] && [ $( nc -vz -w 
 	export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
 	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}' ${PROXY_DOCKER_BIND}"
 	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}'; if [ ! -f /usr/local/share/ca-certificates/EB.crt ]; then if (! which wget > /dev/null ); then apt update && apt -y install wget; fi; wget -O - http://${PROVISIONER}/squid-cert/CA.pem > /usr/local/share/ca-certificates/EB.crt && update-ca-certificates; fi;"
-    wget -O - http://${PROVISIONER}/squid-cert/CA.pem > /usr/local/share/ca-certificates/EB.pem
-    update-ca-certificates
+	wget -O - http://${PROVISIONER}/squid-cert/CA.pem > /usr/local/share/ca-certificates/EB.pem
+	update-ca-certificates
 elif [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ]; then
 	export http_proxy=http://${PROVISIONER}:3128/
 	export https_proxy=http://${PROVISIONER}:3128/
@@ -186,6 +190,18 @@ if [[ $kernel_params == *"debug="* ]]; then
 	tmp="${kernel_params##*debug=}"
 	export param_debug="${tmp%% *}"
 	export debug="${tmp%% *}"
+fi
+
+if [[ $kernel_params == *"resume="* ]]; then
+	tmp="${kernel_params##*resume=}"
+	export param_resume="${tmp%% *}"
+
+    if [ ${param_resume,,} == "true" ]; then
+        echo "export RESUME_PROFILE=1" > .bash_env
+        echo "export RESUME_PROFILE_RUN=("Configuring Image Database")" >> .bash_env
+        export BASH_ENV=.bash_env
+        . .bash_env
+    fi
 fi
 
 if [[ $kernel_params == *"release="* ]]; then
