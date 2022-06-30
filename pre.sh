@@ -396,6 +396,9 @@ rootfs_partuuid=$(lsblk -no UUID ${ROOT_PARTITION})
 bootfs_partuuid=$(lsblk -no UUID ${BOOT_PARTITION})
 swapfs_partuuid=$(lsblk -no UUID ${SWAP_PARTITION})
 
+# Need for Ubuntu Jammy release and later
+chmod 666 /dev/null
+
 if [[ $param_parttype == 'efi' ]]; then
     run "Installing Ubuntu ${param_ubuntuversion} (~10 min)" \
         "docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v $ROOTFS:/target/root ubuntu:${param_ubuntuversion} sh -c \
