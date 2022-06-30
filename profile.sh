@@ -10,7 +10,7 @@ source /opt/bootstrap/functions
 
 # --- Config
 ubuntu_bundles="ubuntu-desktop openssh-server"
-ubuntu_packages="net-tools vim software-properties-common apt-transport-https wget"
+ubuntu_packages="net-tools vim software-properties-common apt-transport-https openssh-server wget"
 
 # --- Install Extra Packages ---
 run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
