@@ -31,16 +31,7 @@ if [[ $kernel_params == *" noproxy="* ]]; then
 	export NO_PROXY="${param_noproxy},${PROVISIONER}"
 fi
 
-if [[ $kernel_params == *" proxy="* ]]; then
-	tmp="${kernel_params##* proxy=}"
-	export param_proxy="${tmp%% *}"
-	export http_proxy=${param_proxy}
-	export https_proxy=${param_proxy}
-	export HTTP_PROXY=${param_proxy}
-	export HTTPS_PROXY=${param_proxy}
-	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
-	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
-elif [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ] && [ $( nc -vz -w 2 ${PROVISIONER} 4128; echo $?; ) -eq 0 ]; then
+if [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ] && [ $( nc -vz -w 2 ${PROVISIONER} 4128; echo $?; ) -eq 0 ]; then
 	PROXY_DOCKER_BIND="-v /tmp/ssl:/etc/ssl/ -v /usr/local/share/ca-certificates/EB.pem:/usr/local/share/ca-certificates/EB.crt"
 	export http_proxy=http://${PROVISIONER}:3128/
 	export https_proxy=http://${PROVISIONER}:4128/
@@ -59,6 +50,15 @@ elif [ $( nc -vz -w 2 ${PROVISIONER} 3128; echo $?; ) -eq 0 ]; then
 	export HTTP_PROXY=http://${PROVISIONER}:3128/
 	export HTTPS_PROXY=http://${PROVISIONER}:3128/
 	export NO_PROXY="localhost,127.0.0.1,${PROVISIONER}"
+	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
+	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
+elif [[ $kernel_params == *" proxy="* ]]; then
+	tmp="${kernel_params##* proxy=}"
+	export param_proxy="${tmp%% *}"
+	export http_proxy=${param_proxy}
+	export https_proxy=${param_proxy}
+	export HTTP_PROXY=${param_proxy}
+	export HTTPS_PROXY=${param_proxy}
 	export DOCKER_PROXY_ENV="--env http_proxy='${http_proxy}' --env https_proxy='${https_proxy}' --env no_proxy='${no_proxy}' --env HTTP_PROXY='${HTTP_PROXY}' --env HTTPS_PROXY='${HTTPS_PROXY}' --env NO_PROXY='${NO_PROXY}'"
 	export INLINE_PROXY="export http_proxy='${http_proxy}'; export https_proxy='${https_proxy}'; export no_proxy='${no_proxy}'; export HTTP_PROXY='${HTTP_PROXY}'; export HTTPS_PROXY='${HTTPS_PROXY}'; export NO_PROXY='${NO_PROXY}';"
 fi
@@ -127,12 +127,6 @@ if [[ $kernel_params == *"agent="* ]]; then
 	export param_agent="${tmp%% *}"
 else
 	export param_agent="master"
-fi
-
-if [[ $kernel_params == *"kernparam="* ]]; then
-	tmp="${kernel_params##*kernparam=}"
-	temp_param_kernparam="${tmp%% *}"
-	export param_kernparam=$(echo ${temp_param_kernparam} | sed 's/#/ /g' | sed 's/:/=/g')
 fi
 
 if [[ $kernel_params == *"ubuntuversion="* ]]; then
@@ -221,11 +215,15 @@ if [[ $kernel_params == *"docker_login_pass="* ]]; then
 	export param_docker_login_pass="${tmp%% *}"
 fi
 
-if [[ $param_release == 'prod' ]]; then
-	export kernel_params="$param_kernparam" # ipv6.disable=1
-else
-	export kernel_params="$param_kernparam"
+if [[ $kernel_params == *"kernparam="* ]]; then
+	tmp="${kernel_params##*kernparam=}"
+	temp_param_kernparam="${tmp%% *}"
+	export param_kernparam=$(echo ${temp_param_kernparam} | sed 's/#/ /g' | sed 's/:/=/g')
 fi
+
+# if [[ $param_release == 'prod' ]] && ; then
+# 	export param_kernparam="$param_kernparam" # ipv6.disable=1
+# fi
 
 MIRROR_STATUS=$(wget --method=HEAD http://${PROVISIONER}${param_httppath}/distro/ 2>&1 | grep "404 Not Found")
 if [[ $kernel_params == *"mirror="* ]]; then
@@ -356,7 +354,7 @@ if [ $freemem -lt 6291456 ]; then
 fi
 
 # --- check if we need to move tmp folder ---
-if [ $freemem -lt 6291456 ]; then
+if [ $freemem -lt 2097152 ]; then
     mkdir -p $ROOTFS/tmp
     export TMP=$ROOTFS/tmp
 else
@@ -371,14 +369,16 @@ elif [ $(wget http://${PROVISIONER}:5000/v2/_catalog -O-) ] 2>/dev/null; then
 fi
 
 # -- Configure Image database ---
-run "Configuring Image Database" \
-    "mkdir -p $ROOTFS/tmp/docker && \
-    chmod 777 $ROOTFS/tmp && \
-    killall dockerd && sleep 2 && \
-    /usr/local/bin/dockerd ${REGISTRY_MIRROR} --data-root=$ROOTFS/tmp/docker > /dev/null 2>&1 &" \
-    "$TMP/provisioning.log"
+if [ $freemem -lt 2097152 ]; then
+    run "Configuring Image Database" \
+        "mkdir -p $ROOTFS/tmp/docker && \
+        chmod 777 $ROOTFS/tmp && \
+        killall dockerd && sleep 2 && \
+        /usr/local/bin/dockerd ${REGISTRY_MIRROR} --data-root=$ROOTFS/tmp/docker > /dev/null 2>&1 &" \
+        "$TMP/provisioning.log"
 
-while (! docker ps > /dev/null ); do sleep 0.5; done; sleep 3
+    while (! docker ps > /dev/null ); do sleep 0.5; done; sleep 3
+fi
 
 if [ ! -z "${param_docker_login_user}" ] && [ ! -z "${param_docker_login_pass}" ]; then
     run "Log in to a Docker registry" \
@@ -402,14 +402,14 @@ chmod 666 /dev/null
 if [[ $param_parttype == 'efi' ]]; then
     run "Installing Ubuntu ${param_ubuntuversion} (~10 min)" \
         "docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v $ROOTFS:/target/root ubuntu:${param_ubuntuversion} sh -c \
-        'if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" > /etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" >> /etc/apt/sources.list; fi && \
+        'if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" | cat - /etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" | cat - /etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
         apt update && \
         apt install -y debootstrap && \
         debootstrap --arch ${param_arch} ${param_ubuntuversion} /target/root ${param_mirror} && \
         if [ -z ${param_mirror} ]; then cp /etc/apt/sources.list /target/root/etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" > /target/root/etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" >> /target/root/etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" | cat - /target/root/etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" | cat - /target/root/etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
         mount --bind dev /target/root/dev && \
         mount -t proc proc /target/root/proc && \
         mount -t sysfs sysfs /target/root/sys && \
@@ -447,14 +447,14 @@ if [[ $param_parttype == 'efi' ]]; then
 else
     run "Installing Ubuntu ${param_ubuntuversion} (~10 min)" \
         "docker run -i --rm --privileged --name ubuntu-installer ${DOCKER_PROXY_ENV} -v $ROOTFS:/target/root ubuntu:${param_ubuntuversion} sh -c \
-        'if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" > /etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" >> /etc/apt/sources.list; fi && \
+        'if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" | cat - /etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" | cat - /etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
         apt update && \
         apt install -y debootstrap && \
         debootstrap --arch ${param_arch} ${param_ubuntuversion} /target/root ${param_mirror} && \
         if [ -z ${param_mirror} ]; then cp /etc/apt/sources.list /target/root/etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" > /target/root/etc/apt/sources.list; fi && \
-        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" >> /target/root/etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_SEC_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion}-security ${PKG_REPO_SEC_LIST}\" | cat - /target/root/etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
+        if [ \"${PKG_REPO_LIST}\" != \"\" ]; then echo \"deb ${param_mirror} ${param_ubuntuversion} ${PKG_REPO_LIST}\" | cat - /target/root/etc/apt/sources.list > /tmp/out && mv /tmp/out /etc/apt/sources.list; fi && \
         mount --bind dev /target/root/dev && \
         mount -t proc proc /target/root/proc && \
         mount -t sysfs sysfs /target/root/sys && \
