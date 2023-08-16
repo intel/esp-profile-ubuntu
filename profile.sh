@@ -9,8 +9,7 @@ set -a
 source /opt/bootstrap/functions
 
 # --- Config
-ubuntu_bundles="ubuntu-desktop openssh-server"
-ubuntu_packages="net-tools vim software-properties-common apt-transport-https openssh-server wget"
+ubuntu_packages="net-tools vim software-properties-common apt-transport-https ubuntu-desktop openssh-server wget"
 
 # --- Install Extra Packages ---
 run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
@@ -21,7 +20,5 @@ run "Installing Extra Packages on Ubuntu ${param_ubuntuversion}" \
     LANG=C.UTF-8 chroot /target/root sh -c \
     \"$(echo ${INLINE_PROXY} | sed "s#'#\\\\\"#g") export TERM=xterm-color && \
     export DEBIAN_FRONTEND=noninteractive && \
-    apt install -y tasksel && \
-    tasksel install ${ubuntu_bundles} && \
     apt install -y ${ubuntu_packages}\"'" \
     ${PROVISION_LOG}
