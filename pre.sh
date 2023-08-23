@@ -369,7 +369,8 @@ elif [ $(wget http://${PROVISIONER}:5000/v2/_catalog -O-) ] 2>/dev/null; then
 fi
 
 # -- Configure Image database ---
-if [ $freemem -lt 2097152 ]; then
+# DockerD does not support overlay fs on tmpfs. VFS storage drive is used which is not efficient.  Require lots of ram in order to run in memory
+if [ $freemem -lt 16777216 ]; then
     run "Configuring Image Database" \
         "mkdir -p $ROOTFS/tmp/docker && \
         chmod 777 $ROOTFS/tmp && \
