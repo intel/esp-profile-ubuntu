@@ -374,12 +374,14 @@ if [ $freemem -lt 16777216 ]; then
     run "Configuring Image Database" \
         "mkdir -p $ROOTFS/tmp/docker && \
         chmod 777 $ROOTFS/tmp && \
-        killall dockerd && sleep 2 && \
-        /usr/local/bin/dockerd ${REGISTRY_MIRROR} --data-root=$ROOTFS/tmp/docker > /dev/null 2>&1 &" \
+        killall dockerd && \
+        while (ls /var/run/docker.pid > /dev/null 2>&1 ); do sleep 0.5; done && \
+        /usr/local/bin/dockerd ${REGISTRY_MIRROR} --data-root=$ROOTFS/tmp/docker >> ${TMP}/docker.log 2>&1 &" \
         "$TMP/provisioning.log"
-
-    while (! docker ps > /dev/null ); do sleep 0.5; done; sleep 3
+	
+    while (! docker ps > /dev/null ); do sleep 0.5; echo "Waiting for Docker to start" >> ${PROVISION_LOG}; done; sleep 3
 fi
+
 
 if [ ! -z "${param_docker_login_user}" ] && [ ! -z "${param_docker_login_pass}" ]; then
     run "Log in to a Docker registry" \
