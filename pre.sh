@@ -603,13 +603,13 @@ run "Enabling Kernel Modules at boot time" \
     "$TMP/provisioning.log"
 
 if [ -f $ROOTFS/etc/skel/.bashrc ]; then
-    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' -f $ROOTFS/etc/skel/.bashrc
+    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' $ROOTFS/etc/skel/.bashrc
 fi
 if [ -f $ROOTFS/root/.bashrc ]; then
-    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' -f $ROOTFS/root/.bashrc
+    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' $ROOTFS/root/.bashrc
 fi
 if [ -f $ROOTFS/home/${param_username}/.bashrc ]; then
-    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' -f $ROOTFS/home/${param_username}/.bashrc
+    sed -i 's|#force_color_prompt=yes|force_color_prompt=yes|g' $ROOTFS/home/${param_username}/.bashrc
 fi
 
 if [ ! -z "${param_proxy}" ]; then
